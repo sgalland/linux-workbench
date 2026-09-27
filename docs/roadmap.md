@@ -8,7 +8,7 @@ Establish project intent, requirements, principles, architecture, safety rules, 
 
 ## v0.2 — Read-only system discovery and baseline
 
-Define and perform approved read-only discovery of the initial CachyOS environment. Record a useful baseline without changing system state.
+Define and perform approved read-only discovery of the initial CachyOS environment. Implement discovery as deterministic local collection code running in the normal user session; have agents analyze its sanitized output instead of relying on direct access from their execution sandbox. Record a useful baseline without changing system state. Access failures limited to an agent sandbox must not be described as failures of the underlying CachyOS session without independent evidence.
 
 ## v0.3 — State comparison and planning
 
