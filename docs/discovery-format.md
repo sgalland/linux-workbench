@@ -2,7 +2,10 @@
 
 `./workbench inspect` writes one sanitized JSON snapshot to
 `.workbench/inspections/`. That directory is ignored by Git. The collector
-does not stage or update the curated machine baseline.
+does not stage or update the curated machine baseline. These ephemeral files
+include exact collection timestamps for local state comparison and are not
+intended for publication or automatic promotion into the public machine
+baseline.
 
 ## Snapshot fields
 
@@ -33,9 +36,10 @@ incomplete.
 ## Initial probe set
 
 The current collector gathers basic OS/kernel/CPU/memory/firmware/storage/PCI
-facts; coarse user-session and Plasma/KWin versions; PipeWire and WirePlumber
-availability/state; ALSA command and procfs facts; bounded counts for audio
-related procfs/sysfs directories; and USB descriptions/topology. Exact
+facts; coarse user-session and Plasma/KWin versions; normalized PipeWire
+audio endpoints and controls; ALSA card/PCM roles and capabilities; direct
+child names and driver links for audio-related sysfs paths; and USB
+descriptions/topology. Exact
 commands and parsers are defined in `workbenchlib/inspect.py`.
 
 Detailed KScreen state is intentionally `not_collected` until a separately
@@ -48,7 +52,9 @@ Probe output is processed in memory and never written as raw stdout/stderr.
 Only parser allowlists are serialized. The snapshot omits credentials,
 environment values other than coarse session facts, serials, UUIDs, MAC/IP
 addresses, SSIDs, PCI/USB bus addresses and unique IDs, disk names and mount
-paths, display IDs/EDID, and audio client/stream identity. Audio mute and
+paths, display IDs/EDID, audio client/stream identity, arbitrary PipeWire
+properties, and persistent PipeWire device identifiers. PipeWire object IDs
+may be retained only as within-snapshot relationship keys. Audio mute and
 volume controls may be retained in normalized form. USB model descriptions,
 hardware class/description, model/vendor fields, and selected device facts
 are retained because they support a useful hardware baseline.

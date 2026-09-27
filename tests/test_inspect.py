@@ -44,18 +44,64 @@ class ParserTests(unittest.TestCase):
         _, facts = inspect._parse_lsusb("Bus 001 Device 004: ID 1234:abcd Example USB device\n")
         self.assertEqual(facts, {"devices": ["Example USB device"]})
 
-    def test_pw_dump_keeps_only_normalized_control_state(self):
-        text = json.dumps([{"id": 17, "type": "PipeWire:Interface:Node", "info": {"props": {"media.class": "Audio/Sink", "node.name": "private-client-name"}, "params": [{"id": "Props", "param": {"mute": True, "volume": 0.5, "channelVolumes": [0.5, 0.6]}}]}}])
+    def test_pw_dump_keeps_endpoint_relationships_and_discards_private_props(self):
+        text = json.dumps([
+            {"id": 9, "info": {"props": {"media.class": "Audio/Device", "device.name": "secret device", "device.description": "Sensitive model"}}},
+            {"id": 17, "info": {"props": {"media.class": "Audio/Sink", "node.name": "private-client-name", "device.id": 9, "device.category": "Speaker", "secret.property": "credential"}, "params": [{"id": "Props", "param": {"mute": True, "volume": 0.5, "channelVolumes": [0.5, 0.6]}}]}}
+        ])
         _, facts = inspect._parse_pw_dump(text)
         encoded = json.dumps(facts)
         self.assertIn('"muted": true', encoded)
         self.assertIn('"volume": 0.5', encoded)
+        sink = next(item for item in facts["endpoints"] if item["kind"] == "sink")
+        self.assertEqual(sink["device_ref"], 9)
+        self.assertEqual(sink["category"], "Speaker")
+        self.assertNotIn("credential", encoded)
+        self.assertNotIn("Sensitive model", encoded)
         self.assertNotIn("private-client-name", encoded)
-        self.assertNotIn('"id"', encoded)
+        self.assertNotIn("secret device", encoded)
+
+    def test_wpctl_default_is_snapshot_local_id(self):
+        raw = "Audio\n ├─ Sinks:\n │  * 42. Built-in Audio Analog Stereo [vol: 0.50]\n │   43. HDMI [vol: 1.00]\n ├─ Sources:\n │   51. Mic [vol: 0.80]\n"
+        _, facts = inspect._parse_wpctl(raw)
+        self.assertEqual(facts["default_markers"], {"sink": 42})
+        self.assertEqual(facts["sink_count"], 2)
 
     def test_alsa_pcm_splits_playback_and_capture_directions(self):
-        _, facts = inspect._parse_alsa_pcm("00-00: Integrated Audio: playback 1 : capture 1\n")
-        self.assertEqual([row["direction"] for row in facts["devices"]], ["playback", "capture"])
+        _, facts = inspect._parse_alsa_pcm("00-00: HDA Analog: playback 1 : capture 1\n00-03: HDMI 0: playback 1\n")
+        self.assertEqual([row["direction"] for row in facts["devices"]], ["playback", "capture", "playback"])
+        self.assertEqual(facts["devices"][0]["role"], "analog")
+        self.assertEqual(facts["devices"][2]["role"], "hdmi")
+
+    def test_alsa_card_names_are_sanitized(self):
+        _, facts = inspect._parse_alsa_cards(" 0 [sof-hda-dsp   ]: HDA-Intel - SOF Audio\n")
+        self.assertEqual(facts["cards"][0]["driver"], "HDA-Intel")
+        self.assertEqual(facts["cards"][0]["name"], "sof-hda-dsp")
+
+    def test_alsa_listings_keep_direction_and_subdevice_capabilities(self):
+        _, facts = inspect._parse_alsa_listing("card 0: PCH [HDA], device 3: HDMI 0 [HDMI 0], subdevices: 1/1\n", "playback")
+        self.assertEqual(facts["devices"][0]["direction"], "playback")
+        self.assertEqual(facts["devices"][0]["role"], "hdmi")
+        self.assertEqual(facts["devices"][0]["available_subdevices"], 1)
+        self.assertEqual(facts["devices"][0]["subdevices"], 1)
+
+    def test_usb_tree_removes_separator_punctuation(self):
+        _, facts = inspect._parse_usb_tree("/: Bus 01.Port 1: Dev 1, Class=root_hub, Driver=xhci_hcd/1p, 480M\n |__ Port 2: Dev 2, If 0, Class=Hub, Driver=hub/4p, 5000M\n")
+        self.assertEqual(facts["topology"][0]["class"], "root_hub")
+        self.assertEqual(facts["topology"][1]["driver"], "hub/4p")
+
+    def test_audio_sysfs_records_sanitized_direct_child_driver(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            node = root / "codec with secret!"
+            node.mkdir()
+            (node / "driver").symlink_to("/sys/bus/hdaudio/drivers/realtek")
+            probe = inspect._probe_audio_sysfs("hda", root)
+        self.assertEqual(probe["facts"]["devices"], [{"name": "codec with secret", "driver": "realtek"}])
+
+    def test_missing_alsa_file_is_unknown_not_absent(self):
+        result = inspect._probe_file("cards", Path("/this/path/does/not/exist"), inspect._parse_alsa_cards)
+        self.assertEqual((result["status"], result["observation"]), ("unavailable", "unknown"))
 
     def test_unit_state_parser_keeps_only_named_service_state(self):
         raw = "Id=pipewire.service\nLoadState=loaded\nActiveState=active\nSubState=running\n\nId=wireplumber.service\nLoadState=loaded\nActiveState=inactive\nSubState=dead\n"

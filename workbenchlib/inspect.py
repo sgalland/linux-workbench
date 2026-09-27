@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 SCHEMA_VERSION = 1
-COLLECTOR_VERSION = "0.1.0"
+COLLECTOR_VERSION = "0.2.0"
 TIMEOUT_SECONDS = 8
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = REPO_ROOT / ".workbench" / "inspections"
@@ -182,8 +182,8 @@ def _parse_usb_tree(text: str) -> tuple[str, dict[str, Any]]:
     for line in text.splitlines():
         if re.search(r"\b(?:Class=|Driver=)", line):
             depth = len(line) - len(line.lstrip(" `|+-"))
-            cls = re.search(r"Class=([^ ]+)", line)
-            driver = re.search(r"Driver=([^ ]+)", line)
+            cls = re.search(r"Class=([^ ,]+)", line)
+            driver = re.search(r"Driver=([^ ,]+)", line)
             speed = re.search(r"(\d+(?:\.\d+)?M)", line)
             rows.append({"depth": depth, **({"class": cls.group(1)} if cls else {}), **({"driver": driver.group(1)} if driver and driver.group(1) != "(none)" else {}), **({"speed": speed.group(1)} if speed else {})})
     return ("present", {"topology": rows}) if rows else ("unknown", {})
@@ -196,7 +196,7 @@ def _parse_alsa_cards(text: str) -> tuple[str, dict[str, Any]]:
         if match:
             # ALSA card labels may contain hardware-derived identifiers. Keep
             # only card index and driver family.
-            cards.append({"index": int(match.group(1)), "driver": match.group(3)[:40]})
+            cards.append({"index": int(match.group(1)), "name": _safe_label(match.group(2)), "driver": _safe_label(match.group(3))})
         playback = re.match(r"\s*card\s+(\d+):\s+[^,]+,\s+device\s+\d+:\s+[^,]+,\s+subdevices:\s+(\d+)/(\d+)", line, re.I)
         if playback:
             card = int(playback.group(1))
@@ -205,13 +205,28 @@ def _parse_alsa_cards(text: str) -> tuple[str, dict[str, Any]]:
     return ("present", {"cards": cards}) if cards else ("not_present", {"cards": []})
 
 
+def _parse_alsa_listing(text: str, direction: str) -> tuple[str, dict[str, Any]]:
+    _, card_facts = _parse_alsa_cards(text)
+    devices = []
+    for line in text.splitlines():
+        match = re.match(r"\s*card\s+(\d+):\s*([^,]+),\s*device\s+(\d+):\s*([^,]+),\s*subdevices:\s*(\d+)/(\d+)", line, re.I)
+        if match:
+            card, _card_label, device, name, available, total = match.groups()
+            devices.append({"card_index": int(card), "device_index": int(device), "name": _safe_label(name), "role": _audio_role(name), "direction": direction, "available_subdevices": int(available), "subdevices": int(total)})
+    present = bool(card_facts["cards"] or devices)
+    return ("present", {"cards": card_facts["cards"], "devices": devices}) if present else ("not_present", {"cards": [], "devices": []})
+
+
 def _parse_alsa_pcm(text: str) -> tuple[str, dict[str, Any]]:
     rows = []
     for line in text.splitlines():
-        match = re.match(r"\s*(\d+)-(\d+):\s*[^:]+:\s*(.*)$", line)
+        match = re.match(r"\s*(\d+)-(\d+):\s*([^:]+):\s*(.*)$", line)
         if match:
-            for direction, count in re.findall(r"\b(playback|capture)\s+(\d+)\b", match.group(3), re.I):
-                rows.append({"card_index": int(match.group(1)), "device_index": int(match.group(2)), "direction": direction.lower(), "subdevices": int(count)})
+            card, device, name, caps = match.groups()
+            for direction, count, available in re.findall(r"\b(playback|capture)\s+(\d+)(?:\s*:\s*(?:subdevices?\s+)?(\d+))?", caps, re.I):
+                row = {"card_index": int(card), "device_index": int(device), "name": _safe_label(name), "role": _audio_role(name), "direction": direction.lower(), "subdevices": int(count)}
+                if available: row["available_subdevices"] = int(available)
+                rows.append(row)
     return ("present", {"devices": rows}) if rows else ("not_present", {"devices": []})
 
 
@@ -227,22 +242,34 @@ def _parse_wpctl(text: str) -> tuple[str, dict[str, Any]]:
             section = None
         if section == "audio" and re.search(r"\bSinks:\s*$", stripped):
             section = "sinks"
-        elif section == "audio" and re.search(r"\bSources:\s*$", stripped):
+        elif re.search(r"\bSources:\s*$", stripped):
             section = "sources"
+        elif re.search(r"\bSinks:\s*$", stripped):
+            section = "sinks"
         elif section == "sinks" and re.search(r"\b\d+\.\s+.*\[vol:.*\]", stripped):
             sinks += 1
         elif section == "sources" and re.search(r"\b\d+\.\s+.*\[vol:.*\]", stripped):
             sources += 1
     if section is None and "audio" not in text.lower():
         return "unknown", {}
-    return "present", {"sink_count": sinks, "source_count": sources}
+    defaults = {}
+    active_section = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if re.search(r"\bSinks:\s*$", stripped): active_section = "sink"
+        elif re.search(r"\bSources:\s*$", stripped): active_section = "source"
+        elif stripped.startswith(("Filters", "Streams", "Video", "Settings")): active_section = None
+        if active_section and "*" in stripped:
+            match = re.search(r"\b(\d+)\.\s+", stripped)
+            if match: defaults[active_section] = int(match.group(1))
+    return "present", {"sink_count": sinks, "source_count": sources, "default_markers": defaults}
 
 
 def _parse_pw_dump(text: str) -> tuple[str, dict[str, Any]]:
     try:
         objects = json.loads(text)
         counts: dict[str, int] = {}
-        audio_state = []
+        endpoints = []
         for obj in objects:
             if not isinstance(obj, dict):
                 continue
@@ -251,6 +278,15 @@ def _parse_pw_dump(text: str) -> tuple[str, dict[str, Any]]:
             media_class = props.get("media.class")
             if isinstance(media_class, str) and media_class in {"Audio/Sink", "Audio/Source", "Audio/Device"}:
                 counts[media_class] = counts.get(media_class, 0) + 1
+                oid = obj.get("id")
+                endpoint = {"snapshot_id": oid if isinstance(oid, int) else len(endpoints), "kind": media_class.split("/")[-1].lower()}
+                for key in ("device.id", "node.device", "device.profile"):
+                    val = props.get(key)
+                    if key == "device.id" and isinstance(val, int): endpoint["device_ref"] = val
+                    elif isinstance(val, str): endpoint[key.replace(".", "_")] = _safe_label(val)
+                category = props.get("device.category") or props.get("media.role")
+                if isinstance(category, str): endpoint["category"] = _safe_label(category)
+                endpoints.append(endpoint)
             # Allowlist normalized mute/volume only on device/endpoint objects.
             # Do not retain node names, descriptions, client or stream identity.
             params = info.get("params") or []
@@ -273,10 +309,23 @@ def _parse_pw_dump(text: str) -> tuple[str, dict[str, Any]]:
                 if isinstance(channels, list) and all(isinstance(v, (int, float)) for v in channels):
                     item["channel_volumes"] = [round(float(v), 3) for v in channels[:8]]
                 if item:
-                    audio_state.append(item)
-        return "present", {"audio_class_counts": counts, "normalized_controls": audio_state}
+                    target = next((x for x in endpoints if x["snapshot_id"] == obj.get("id")), None)
+                    if target is not None: target["controls"] = item
+        return "present", {"audio_class_counts": counts, "endpoints": endpoints}
     except (json.JSONDecodeError, TypeError, AttributeError):
         return "unknown", {}
+
+
+def _safe_label(value: str) -> str:
+    value = re.sub(r"[^A-Za-z0-9 _./+-]", "", value)
+    return re.sub(r"\s+", " ", value).strip()[:80]
+
+
+def _audio_role(value: str) -> str:
+    label = value.lower()
+    for term, role in (("hdmi", "hdmi"), ("deep buffer", "deep_buffer"), ("dmic", "microphone"), ("mic", "microphone"), ("analog", "analog"), ("headphone", "headphone")):
+        if term in label: return role
+    return "other"
 
 
 def _parse_pactl(text: str) -> tuple[str, dict[str, Any]]:
@@ -356,6 +405,27 @@ def _probe_directory_count(name: str, path: Path) -> dict[str, Any]:
         return {"id": name, "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_count", "path": str(path)}}
 
 
+def _probe_audio_sysfs(name: str, path: Path, *, filter_audio: bool = False) -> dict[str, Any]:
+    """Collect bounded direct-child names and driver links, never recurse."""
+    try:
+        rows = []
+        for entry in sorted(path.iterdir(), key=lambda p: p.name)[:128]:
+            row = {"name": _safe_label(entry.name)}
+            try:
+                driver = (entry / "driver").resolve().name
+            except OSError:
+                driver = ""
+            if driver: row["driver"] = _safe_label(driver)
+            if filter_audio and not re.search(r"audio|sound|codec|amp|speaker|hda", entry.name + " " + driver, re.I):
+                continue
+            rows.append(row)
+        return {"id": name, "status": "ok", "observation": "present" if rows else "not_present", "facts": {"devices": rows}, "provenance": {"kind": "sysfs_direct_children", "path": str(path)}}
+    except FileNotFoundError:
+        return {"id": name, "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "sysfs_direct_children", "path": str(path)}}
+    except OSError:
+        return {"id": name, "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "sysfs_direct_children", "path": str(path)}}
+
+
 def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = Path("/sys"), etc: Path = Path("/etc")) -> dict[str, Any]:
     """Collect one snapshot. Paths are injectable for fixture-only tests."""
     probes: list[dict[str, Any]] = []
@@ -395,21 +465,21 @@ def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = 
         _probe_command("pipewire_snapshot", ["pw-dump"], _parse_pw_dump, runner),
         _probe_command("wireplumber_status", ["wpctl", "status"], _parse_wpctl, runner),
         _probe_command("pipewire_user_units", ["systemctl", "--user", "show", "--no-pager", "--property=Id,LoadState,ActiveState,SubState", "pipewire.service", "wireplumber.service"], _parse_unit_states, runner),
-        _probe_command("alsa_playback", ["aplay", "-l"], _parse_alsa_cards, runner),
-        _probe_command("alsa_capture", ["arecord", "-l"], _parse_alsa_cards, runner),
+        _probe_command("alsa_playback", ["aplay", "-l"], lambda text: _parse_alsa_listing(text, "playback"), runner),
+        _probe_command("alsa_capture", ["arecord", "-l"], lambda text: _parse_alsa_listing(text, "capture"), runner),
         _probe_file("alsa_proc_cards", proc / "asound/cards", _parse_alsa_cards),
         _probe_file("alsa_proc_pcm", proc / "asound/pcm", _parse_alsa_pcm),
         _probe_directory_count("alsa_proc_entries", proc / "asound"),
-        _probe_directory_count("hdaudio_devices", sysfs / "bus/hdaudio/devices"),
-        _probe_directory_count("i2c_devices", sysfs / "bus/i2c/devices"),
-        _probe_directory_count("acpi_devices", sysfs / "bus/acpi/devices"),
+        _probe_audio_sysfs("hdaudio_devices", sysfs / "bus/hdaudio/devices"),
+        _probe_audio_sysfs("i2c_audio_devices", sysfs / "bus/i2c/devices", filter_audio=True),
+        _probe_audio_sysfs("soundwire_devices", sysfs / "bus/soundwire/devices"),
     ])
 
     # Only top-level names are collected. No recursive sysfs/proc dumps.
     sound_path = sysfs / "class/sound"
     try:
         sound_names = sorted(p.name for p in sound_path.iterdir())
-        probes.append({"id": "sound_sysfs", "status": "ok", "observation": "present" if sound_names else "not_present", "facts": {"entry_count": len(sound_names)}, "provenance": {"kind": "directory_names", "path": str(sound_path)}})
+        probes.append({"id": "sound_sysfs", "status": "ok", "observation": "present" if sound_names else "not_present", "facts": {"devices": [{"name": _safe_label(name)} for name in sound_names[:128]]}, "provenance": {"kind": "directory_names", "path": str(sound_path)}})
     except FileNotFoundError:
         probes.append({"id": "sound_sysfs", "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_names", "path": str(sound_path)}})
     except OSError:
