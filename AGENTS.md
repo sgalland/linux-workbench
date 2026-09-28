@@ -14,6 +14,10 @@ These rules apply to every agent working in this repository. System mutation is 
 10. Never treat a generated plan as authorization to execute it.
 11. Repository documentation and code changes are allowed when requested. This permission does not authorize system mutation.
 
+## HP Envy audio research
+
+Before any future HP Envy audio work, read the dated research record linked from `machines/hp-envy/baseline/README.md`. On this HP ENVY 17-ch0xxx, writing `1` to `/sys/class/sound/hwC0D0/reconfig` with proposed pin overrides hung during codec/card teardown and required a reboot. Do not repeat live HDA sysfs reconfiguration on this machine unless new evidence establishes a safe method. The proposed override was never applied successfully and must not be treated as a fix.
+
 ## Change lifecycle
 
 For any authorized system configuration change, use this lifecycle:

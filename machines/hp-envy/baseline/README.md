@@ -16,6 +16,7 @@ Read-only discovery baseline for the initial CachyOS machine profile. Collected 
 - [`devices.md`](devices.md) — PCI, graphics, USB, and network hardware summary.
 - [`desktop.md`](desktop.md) — session type, Plasma version, and display-query outcome.
 - [`audio.md`](audio.md) — ALSA, SOF/HDA, related buses, session API availability, and relevant kernel observations.
+- [`audio-investigation-2026-09-27.md`](../audio-investigation-2026-09-27.md) — speaker observations, failed live sysfs reconfiguration, recovery, and safety constraints.
 - [`development.md`](development.md) — requested tool availability and versions.
 
 All files are summarized for a public repository. Unique identifiers, serials, UUIDs, network addresses/names, user-specific mount paths, and unrelated log lines were omitted.

@@ -1,5 +1,7 @@
 # Audio baseline
 
+The later speaker investigation and sysfs reconfiguration experiment are recorded in [`audio-investigation-2026-09-27.md`](../audio-investigation-2026-09-27.md). Read that safety record before any further machine-specific audio work.
+
 This records the observed state without attempting diagnosis or repair. The known report that the Bang & Olufsen internal speakers do not work correctly under Linux is preserved as user-provided context. Other audio functionality has worked in previous testing, also per user report.
 
 ## Kernel and hardware path
