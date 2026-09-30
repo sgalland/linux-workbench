@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 SCHEMA_VERSION = 1
-COLLECTOR_VERSION = "0.2.0"
+COLLECTOR_VERSION = "0.3.0"
 TIMEOUT_SECONDS = 8
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = REPO_ROOT / ".workbench" / "inspections"
@@ -94,6 +94,24 @@ def _parse_uname(text: str) -> tuple[str, dict[str, Any]]:
 def _parse_version(text: str) -> tuple[str, dict[str, Any]]:
     match = re.search(r"\b(\d+(?:\.\d+)+(?:[-+][A-Za-z0-9._-]+)?)\b", text)
     return ("present", {"version": match.group(1)}) if match else ("unknown", {})
+
+
+def _parse_package_ids(text: str) -> tuple[str, dict[str, Any]]:
+    """Accept only pacman package names, never descriptions or raw output."""
+    rows = text.splitlines()
+    if any(not re.fullmatch(r"[a-z0-9][a-z0-9@._+-]*", row) for row in rows):
+        return "unknown", {}
+    ids = sorted(set(rows))
+    return ("present" if ids else "not_present"), {"ids": ids}
+
+
+def _parse_flatpak_ids(text: str) -> tuple[str, dict[str, Any]]:
+    rows = text.splitlines()
+    # Application IDs are reverse-DNS style. Reject diagnostic or column text.
+    if any(not re.fullmatch(r"[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+){2,}", row) for row in rows):
+        return "unknown", {}
+    ids = sorted(set(rows))
+    return ("present" if ids else "not_present"), {"ids": ids}
 
 
 def _parse_lscpu(text: str) -> tuple[str, dict[str, Any]]:
@@ -450,6 +468,11 @@ def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = 
     probes.append(_probe_command("pci", ["lspci", "-nnk"], _parse_pci, runner))
     probes.append(_probe_command("usb", ["lsusb"], _parse_lsusb, runner))
     probes.append(_probe_command("usb_topology", ["lsusb", "-t"], _parse_usb_tree, runner))
+    probes.extend([
+        _probe_command("software_repo_explicit", ["pacman", "-Qqen"], _parse_package_ids, runner),
+        _probe_command("software_foreign_explicit", ["pacman", "-Qqem"], _parse_package_ids, runner),
+        _probe_command("software_flatpak_apps", ["flatpak", "list", "--app", "--columns=application"], _parse_flatpak_ids, runner),
+    ])
 
     # Session facts contain only coarse, normalized values; raw environment is
     # never copied. Probe facility readiness with fixed display clients.

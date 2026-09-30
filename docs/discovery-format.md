@@ -42,6 +42,15 @@ child names and driver links for audio-related sysfs paths; and USB
 descriptions/topology. Exact
 commands and parsers are defined in `workbenchlib/inspect.py`.
 
+Software inventory has three separate probes: `software_repo_explicit` uses
+`pacman -Qqen`, `software_foreign_explicit` uses `pacman -Qqem`, and
+`software_flatpak_apps` uses `flatpak list --app --columns=application`.
+Each retains sorted, unique package/application IDs only. The source class is
+the probe ID; versions, descriptions, origins, and raw output are discarded.
+Missing tools and failed or malformed output are unknown, never an empty
+installed set. AppImages, manual desktop files, Wine/game libraries, and
+JetBrains Toolbox internals remain outside this inventory.
+
 Detailed KScreen state is intentionally `not_collected` until a separately
 approved normal-session experiment. EFI inventory is deferred. The collector
 does not inspect logs or journal contents.

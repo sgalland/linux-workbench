@@ -9,6 +9,14 @@ from workbenchlib import inspect
 
 
 class ParserTests(unittest.TestCase):
+    def test_software_parsers_keep_only_valid_identifiers(self):
+        self.assertEqual(inspect._parse_package_ids("zsh\nfish\nfish\n"), ("present", {"ids": ["fish", "zsh"]}))
+        self.assertEqual(inspect._parse_flatpak_ids("org.example.App\n"), ("present", {"ids": ["org.example.App"]}))
+        self.assertEqual(inspect._parse_package_ids(""), ("not_present", {"ids": []}))
+        for raw in ("secret /home/person\n", "fish\nmalformed name\n"):
+            self.assertEqual(inspect._parse_package_ids(raw), ("unknown", {}))
+        self.assertEqual(inspect._parse_flatpak_ids("Application\norg.example.App\n"), ("unknown", {}))
+
     def test_uname_field_order(self):
         observation, facts = inspect._parse_uname("Linux 7.2.8-1-cachyos x86_64\n")
         self.assertEqual(observation, "present")
@@ -111,6 +119,27 @@ class ParserTests(unittest.TestCase):
 
 
 class CollectionTests(unittest.TestCase):
+    def test_software_inventory_failures_are_unknown_and_private_output_is_discarded(self):
+        def runner(argv, timeout):
+            if argv[:2] == ["pacman", "-Qqen"]:
+                return "fish\n", "", 0
+            if argv[:2] == ["pacman", "-Qqem"]:
+                return "secret\n", "private diagnostic", 1
+            if argv[0] == "flatpak":
+                return "", "", -2
+            return "", "", 0
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with patch.object(inspect.shutil, "which", return_value="/fixture/tool"):
+                snapshot = inspect.collect(runner, proc=root, sysfs=root, etc=root)
+        probes = {p["id"]: p for p in snapshot["probes"]}
+        self.assertEqual(probes["software_repo_explicit"]["facts"], {"ids": ["fish"]})
+        self.assertEqual(probes["software_foreign_explicit"]["observation"], "unknown")
+        self.assertEqual(probes["software_flatpak_apps"]["status"], "missing_tool")
+        self.assertNotIn("private diagnostic", json.dumps(snapshot))
+        self.assertNotIn('"secret"', json.dumps(snapshot))
+
     def test_failed_probe_does_not_abort_and_snapshot_marks_unknown(self):
         def runner(argv, timeout):
             if argv[0] == "uname":
