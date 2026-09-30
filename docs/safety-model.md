@@ -31,4 +31,12 @@ using data-only adapter mappings. Its output is a proposal for review, not
 authorization. `missing` describes an observed gap, including for optional
 intent; it is not an install instruction. Unknown observations suppress that
 classification, and unmanaged installed software produces no removal action.
-There is no apply command or mutation path in this batch.
+Batch 004 adds fixture-only transaction machinery. A dry-run returns a plan
+fingerprint and narrow backup scope without mutation. Fixture authorization
+binds one transaction ID, the exact plan fingerprint, and a digest of the
+observed pre-state. Drift invalidates it. The fixture runner rejects any
+backend that is not explicitly marked fixture-only. No production
+authorization issuer, live apply command, or live backend is present. An
+agent's receipt of a batch instruction or generated plan is never live
+authorization. A later live executor would require a separate human-issued
+approval bound to the exact reviewed transaction and a fresh pre-state check.

@@ -13,6 +13,7 @@ These rules apply to every agent working in this repository. System mutation is 
 9. Record reusable discoveries in this repository rather than relying on conversational memory.
 10. Never treat a generated plan as authorization to execute it.
 11. Repository documentation and code changes are allowed when requested. This permission does not authorize system mutation.
+12. A live mutation requires an exact human-reviewed transaction authorization bound to its ID, plan fingerprint, and fresh pre-state. A generic task request or generated plan is insufficient. Batch 004 code execution is fixture-only.
 
 ## HP Envy audio research
 

@@ -5,6 +5,7 @@ from workbenchlib.backup import Value
 
 
 class Fixture:
+    fixture_only = True
     def __init__(self):
         self.desktops = [Desktop("fixture-id", "private fixture name")]
         self.current = "fixture-id"
