@@ -33,6 +33,12 @@ Portable desired-state IDs, intent, and review categories are defined in
 adapter mapping. Neither file is an apply mechanism; observed state is never
 automatically promoted into desired intent.
 
+The candidate desktop outcomes in `spec/desktop-intent.candidate.json` use
+portable logical IDs and four human-facing workspace names. KDE mechanisms,
+support classifications, alternatives, future surfaces, and verification
+strategies live only in `adapters/kde-desktop.candidate.json`. Both are
+validation-only candidate data; neither implements a desktop change.
+
 ## System change lifecycle
 
 Any separately authorized system configuration change follows **inspect → plan → backup → apply → verify → rollback**. Store reusable plans and discoveries in the repository, but never treat a generated plan as authorization to execute it.

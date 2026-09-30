@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "candidate",
+  "outcomes": [
+    {"id": "workspace.named_contexts", "names": ["Development", "General", "Office", "Creative"]},
+    {"id": "window.overlapping"},
+    {"id": "window.snap"},
+    {"id": "shortcuts.application_conventions"},
+    {"id": "shortcuts.workstation_meta"},
+    {"id": "control_area.persistent_side"},
+    {"id": "launcher.grouped"},
+    {"id": "monitor.useful"},
+    {"id": "desktop_menu.application_system"}
+  ]
+}

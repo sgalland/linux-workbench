@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "status": "candidate",
+  "target": "kde-plasma",
+  "mappings": [
+    {"id": "workspace.named_contexts", "support": "supported-with-limitations", "mechanism": "named KWin virtual desktops", "alternatives": ["Plasma Activities", "Activities with virtual desktops"], "decision": "Window grouping is primary; Activities are conditional on separate widget contexts.", "future_surface": "Virtual Desktops settings and KWin global shortcuts", "verify": "Names, switch behavior and persistence after authorized change"},
+    {"id": "window.overlapping", "support": "supported", "mechanism": "KWin ordinary window management", "future_surface": "KWin Window Behavior", "verify": "Ordinary windows overlap in an authorized session check"},
+    {"id": "window.snap", "support": "supported", "mechanism": "KWin quick tile and edge actions", "future_surface": "KWin Screen Edges and global shortcuts", "verify": "Candidate actions and conflicts after authorization"},
+    {"id": "shortcuts.application_conventions", "support": "supported-with-limitations", "mechanism": "KDE standard application shortcuts", "alternatives": ["application-owned bindings"], "decision": "KDE does not centrally guarantee each application's bindings.", "future_surface": "KDE standard shortcuts and individual application settings", "verify": "Review representative applications"},
+    {"id": "shortcuts.workstation_meta", "support": "supported-with-limitations", "mechanism": "KWin and Plasma global shortcuts", "future_surface": "Global Shortcuts settings", "verify": "Check exact actions, duplicates and reserved bindings"},
+    {"id": "control_area.persistent_side", "support": "supported-with-limitations", "mechanism": "left or right Plasma panel with hiding disabled", "future_surface": "Plasma panel layout", "verify": "Panel remains visible after login and display changes"},
+    {"id": "launcher.grouped", "support": "supported-with-limitations", "mechanism": "Application Launcher or Application Menu categories", "alternatives": ["favorites", "menu editor"], "decision": "Built-in categories cover basic grouping; custom drawers need definition.", "future_surface": "Plasma launcher widget and menu editor", "verify": "Review requested groups and menu presentation"},
+    {"id": "monitor.useful", "support": "supported", "mechanism": "Plasma System Monitor and sensor widgets", "future_surface": "System Monitor and panel widgets", "verify": "Review chosen metrics and live values"},
+    {"id": "desktop_menu.application_system", "support": "unknown", "mechanism": "desktop mouse actions and application launcher", "alternatives": ["standard context menu", "launcher mouse action"], "decision": "One right-click retaining system actions and showing the full application menu is unverified.", "future_surface": "Plasma Desktop Mouse Actions", "verify": "Controlled GUI check preserving access to desktop settings"}
+  ]
+}
