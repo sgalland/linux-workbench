@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "software": [
+    {"id": "software.interactive-shell", "intent": "optional", "review_category": "development"}
+  ],
+  "settings_surfaces": [
+    {"id": "settings.interactive-shell", "intent": "optional", "review_category": "development"}
+  ]
+}

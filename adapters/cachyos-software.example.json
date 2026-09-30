@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "software": [
+    {"logical_id": "software.interactive-shell", "source": "repo", "identifier": "fish"}
+  ]
+}
