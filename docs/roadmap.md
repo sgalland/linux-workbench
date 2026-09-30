@@ -26,3 +26,8 @@ four-workspace live dry-run. The pilot is [awaiting exact human authorization](r
 No live desktop change has been applied. A future approved transaction must
 revalidate pre-state, back up, apply, verify, and roll back on failure under
 the safety lifecycle. This roadmap entry grants no authorization.
+
+
+## AI capability track
+
+AI-oriented capabilities are tracked separately in [AI Capabilities Roadmap](ai-capabilities-roadmap.md). That track is intentionally orthogonal to the numbered workstation configuration batches: read-only reasoning, diagnostics, knowledge distillation, and bounded agent orchestration may advance without un-deferring broader workstation mutation work such as Batch 005.
