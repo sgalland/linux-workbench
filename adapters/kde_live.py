@@ -107,7 +107,7 @@ class KWinBackend:
         self._run(argv + ([value.value] if value.present else ["--delete"]))
 
     def set_name(self, desktop_id, name):
-        if not isinstance(desktop_id, str) or not desktop_id or name != TARGET[0]:
+        if not isinstance(desktop_id, str) or not desktop_id or not isinstance(name, str):
             raise ValueError("rename outside pilot")
         self._run(["busctl", "--user", "call", SERVICE, OBJECT, INTERFACE,
                    "setDesktopName", "ss", desktop_id, name])
