@@ -23,3 +23,10 @@ runtime interface before any production executor can be used. Do not relax
 the version/interface guard, issue an authorization, or invoke live apply or
 rollback on this evidence. The remaining Batch 004B jobs stop at this
 blocker under the handoff's explicit stop condition.
+
+Batch 004C subsequently resolved the signature discrepancy through the
+[exact-version source record](../../adapters/kde-kwin-675-dbus-signatures.md):
+the v6.7.5 C++ struct and marshaller define `a(uss)` on the wire while its XML
+declares `a(iss)`. The Batch 004B stop above was correct on the evidence then
+available. The 004C compatibility rule still requires fresh validation and
+does not itself authorize a live mutation.
