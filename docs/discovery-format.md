@@ -79,3 +79,13 @@ are retained because they support a useful hardware baseline.
 This is an initial conservative contract, not a claim that arbitrary future
 probes are safe. Each new probe needs a reviewed parser and fixture tests
 before it is added.
+
+## Snapshot comparison
+
+`./workbench compare <older.json> <newer.json>` reads schema v1 snapshots
+only from `.workbench/inspections/`. It reports stable keys and one of
+`added`, `removed`, `changed`, `unchanged`, or `unknown`; values and raw probe
+output are never printed. Software IDs and settings-surface IDs are compared
+individually. Other probes are compared as whole normalized facts. Failed,
+missing, or not-collected probes yield `unknown`, so they cannot imply
+removal. A settings surface with an unknown state is likewise unknown.
