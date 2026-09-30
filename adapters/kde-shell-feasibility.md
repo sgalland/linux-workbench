@@ -1,0 +1,18 @@
+# Plasma shell feasibility (Batch 003, Job 4)
+
+| Portable outcome | Classification | KDE mechanism and evidence | Future surface, persistence, rollback |
+| --- | --- | --- | --- |
+| Persistent side dock/control area | Supported with limitations | A Plasma panel can be placed at the `left` or `right` edge with hiding mode `none`; [KDE panel API](https://develop.kde.org/docs/plasma/scripting/api/) documents these properties. A panel can host launchers, task manager, system tray, and widgets. This is a screen-edge panel, not an independently scoped Activity panel. | Plasma panel layout/GUI or reviewed Plasma layout script; expected session persistence, not locally verified. Restore a saved panel layout; widget IDs and display changes complicate rollback. |
+| Grouped application drawers/launchers | Supported directly for application categories; supported with limitations for custom groups | [Application Launcher and Application Menu](https://docs.kde.org/trunk_kf6/en/plasma-desktop/plasma-desktop/panel.html) provide browsable application structure and favorites. KDE [lists launcher alternatives](https://develop.kde.org/docs/plasma/widget/properties/). Exact custom drawer grouping and ordering are not established. | Launcher widget selection and menu editor, with panel layout backup; verify visible groups after login. Changing menu entries can affect more than one launcher. |
+| Useful system monitors | Supported directly | KDE [documents System Monitor sensor faces and panel widgets](https://develop.kde.org/docs/apps/sensor-faces/). Choose a few reviewed CPU/memory/network metrics later; no sensor IDs or private widget state collected now. | System Monitor UI and panel widgets; verify live values and persistence later. Back up widget layout/config before a change. |
+| Application/system menu from desktop right-click | Supported with limitations / exact combined behavior unknown | [Plasma handbook](https://docs.kde.org/stable_kf6/en/plasma-desktop/plasma-desktop/plasma-desktop.pdf) documents desktop right-click and configurable mouse actions, while the [panel manual](https://docs.kde.org/trunk_kf6/en/plasma-desktop/plasma-desktop/panel.html) documents separate application launchers. Official sources reviewed here do not establish that one right-click can retain the standard desktop/system context menu **and** show the full application menu. | Desktop Mouse Actions/containment setting. Preserve the standard context menu until access and recovery are reviewed; future controlled verification required. Backup and restore containment mouse actions. No extension chosen. |
+| Conventional overlapping windows | Supported directly | [KWin window behavior](https://docs.kde.org/stable_kf6/en/kwin/kcontrol/windowbehaviour/index.html) offers placement and optional edge quick tiling; [window rules](https://docs.kde.org/stable_kf6/en/kwin/kcontrol/windowspecific/attributes.html) offer optional per-window placement. | KWin settings/rules only if a specific behavior needs changing; verify ordinary overlapping windows and optional snap in a future authorized test. Rules add rollback complexity. |
+
+These are KDE capability findings, not observations that this user's current
+panel, widgets, launcher, monitor, or mouse actions already implement them.
+Panels and widgets are expected to be persisted by Plasma configuration, but
+this batch makes no login/reboot claim. No third-party component is required
+for the side panel, grouped application menu, or monitoring. The desktop
+right-click combination remains a decision rather than a dependency on an
+unverified extension. No panel, launcher, widget, menu, or KWin state was
+inspected or changed.
