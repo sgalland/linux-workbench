@@ -55,6 +55,19 @@ class ControlTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run_fixture(self.backend, self.tx, self.auth, self.store)
 
+    def test_full_fixture_lifecycle_with_restore(self):
+        result = run_fixture(self.backend, self.tx, self.auth, self.store, rollback_after_verify=True)
+        self.assertEqual(result["status"], "rolled-back")
+        self.assertEqual(result["rollback"]["failed_keys"], [])
+        self.assertEqual(self.backend.inspect(), self.state)
+
+    def test_partial_apply_failure_restores_fixture(self):
+        self.backend.fail_at = 2
+        result = run_fixture(self.backend, self.tx, self.auth, self.store)
+        self.assertEqual(result["status"], "rolled-back")
+        self.assertEqual(result["rollback"]["failed_keys"], [])
+        self.assertEqual(self.backend.inspect(), self.state)
+
 
 if __name__ == "__main__":
     unittest.main()
