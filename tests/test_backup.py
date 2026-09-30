@@ -56,6 +56,15 @@ class BackupTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.create()
 
+    def test_load_rejects_backup_file_symlink(self):
+        self.create()
+        path = self.store.root / "pilot-v1.json"
+        target = self.store.root / "target.json"
+        path.rename(target)
+        path.symlink_to(target)
+        with self.assertRaises(ValueError):
+            self.store.load("pilot-v1", self.fp, self.keys)
+
 
 if __name__ == "__main__":
     unittest.main()

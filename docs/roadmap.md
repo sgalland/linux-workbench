@@ -20,4 +20,9 @@ Batch 003 completed the read-only feasibility investigation and produced a candi
 
 ## v0.5 — First controlled reversible mutation
 
-Design one small, explicitly approved system change with a backup and rollback path, then apply and verify it under the safety lifecycle. Selection of a change and any approval remain future steps; this roadmap entry grants no authorization.
+Batch 004 prepared the mutation transaction model, private backup substrate,
+KWin 6.7.5 workspace adapter design, fixture lifecycle proof, and a sanitized
+four-workspace live dry-run. The pilot is [awaiting exact human authorization](reviews/workbench-batch-004-workspace-pilot.md).
+No live desktop change has been applied. A future approved transaction must
+revalidate pre-state, back up, apply, verify, and roll back on failure under
+the safety lifecycle. This roadmap entry grants no authorization.

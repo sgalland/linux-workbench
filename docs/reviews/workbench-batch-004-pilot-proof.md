@@ -26,14 +26,15 @@ Read-only probe date: 2026-09-29. KWin reports **6.7.5**. Its local D-Bus
 virtual-desktop interface matches the source-backed signatures; the ordered
 desktop property reports **one desktop**, **one row**, and a current desktop
 matching that one desktop. The probe read only the four KWin desktop
-properties and ten exact `kwinrc` `Desktops` keys; private name, ID, and key
+properties, ten exact `kwinrc` `Desktops` backup keys, and an `Id_5` absence
+guard. Private name, ID, and key
 values were saved only under ignored `.workbench/backups/` with user-only
 permissions and are not reproduced here.
 
 Dry-run status: **authorization-required**. Transaction ID:
 `kde-four-workspaces-v1`. Fingerprint:
-`074e03fd005d0fe4f449a383fe813d2a6be4335e2dcdc68221476ba19b827e56`.
-The pre-state digest is
+`67b55bbe399a0eee08843d5b2ae86b83c95da3651c0a1c9f4bc0232e5b9d7963`.
+The runtime pre-state digest is
 `684b42ec9a05d16974b72cbb87771bc0a9dd3cc9dd061e6652ece7f70917d865`.
 These identify this observation; a change in the exact plan or pre-state
 invalidates them. They are **not authorization**.

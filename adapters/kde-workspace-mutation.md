@@ -24,6 +24,9 @@ shows the exact `Desktops` keys this operation can write: `Number`, `Rows`,
 and `Id_1`–`Id_4` and `Name_1`–`Name_4`. It also shows that adding/removing
 desktops can turn absent keys into present keys. Backup and rollback must
 preserve presence separately from value for precisely those ten keys.
+The read-only precondition probe also requires `Id_5` to be absent: KWin's
+save loop could otherwise delete it on rollback. Its value is never backed
+up or reported because the pilot is blocked if it exists.
 
 For this one-desktop pilot, keep the original desktop ID at position zero;
 rename it, then append three desktops in order. The original is the active

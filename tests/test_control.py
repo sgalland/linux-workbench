@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from adapters.kde_workspace import plan
+from adapters.kde_workspace import bind_config, plan
 from test_kde_workspace import Fixture
 from workbenchlib.backup import BackupStore
 from workbenchlib.control import FixtureAuthorization, authorize_fixture, dry_run, run_fixture
@@ -19,7 +19,7 @@ class ControlTests(unittest.TestCase):
         self.store = BackupStore(repo)
         self.backend = Fixture()
         self.state = self.backend.inspect()
-        self.tx = plan(self.state, "control-v1").transition(Status.AUTHORIZATION_REQUIRED)
+        self.tx = bind_config(plan(self.state, "control-v1"), self.backend).transition(Status.AUTHORIZATION_REQUIRED)
         self.auth = authorize_fixture(self.tx, self.state)
 
     def test_dry_run_does_not_mutate_or_create_backup(self):
@@ -40,6 +40,12 @@ class ControlTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run_fixture(self.backend, self.tx, self.auth, self.store)
         self.assertFalse(self.store.root.exists())
+
+    def test_config_drift_invalidates_authorization(self):
+        from workbenchlib.backup import Value
+        self.backend.config["Rows"] = Value(True, "1")
+        with self.assertRaises(ValueError):
+            run_fixture(self.backend, self.tx, self.auth, self.store)
 
     def test_live_and_duplicate_apply_rejected(self):
         self.backend.fixture_only = False

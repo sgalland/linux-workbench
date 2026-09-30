@@ -5,7 +5,7 @@ interface and exact Desktops configuration keys. This module never connects
 to the live session on its own.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import json
 from typing import Protocol
@@ -64,6 +64,18 @@ def plan(state: State, transaction_id: str) -> Transaction:
                        operations=operations, backup_keys=BACKUP_KEYS,
                        verification=(("names_in_order", "|".join(TARGET)), ("original_id_first", state.desktops[0].id),
                                      ("current_id", state.current_id), ("rows", "1")), rollback=rollback)
+
+
+def bind_config(tx: Transaction, backend: Backend) -> Transaction:
+    if tx.status.value != "planned" or any(key == "config_sha256" for key, _ in tx.preconditions):
+        raise ValueError("config already bound or plan no longer mutable")
+    values = {key: backend.read_key(key) for key in CONFIG_KEYS}
+    if any(not isinstance(value, Value) for value in values.values()):
+        raise ValueError("unknown config pre-state")
+    canonical = json.dumps({key: (value.present, value.value) for key, value in values.items()},
+                           sort_keys=True, ensure_ascii=False)
+    digest = hashlib.sha256(canonical.encode()).hexdigest()
+    return replace(tx, preconditions=tx.preconditions + (("config_sha256", digest),))
 
 
 def backup_value(backend: Backend, state: State, key: str) -> Value:

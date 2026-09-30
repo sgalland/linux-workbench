@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 from typing import Callable
 
 
@@ -81,10 +82,13 @@ class BackupStore:
     def load(self, backup_id: str, fingerprint: str, allowlist: tuple[str, ...]) -> dict[str, Value]:
         self._safe_root(create=False)
         path = self.root / f"{self._id(backup_id)}.json"
-        if path.is_symlink() or not path.is_file() or path.stat().st_mode & 0o077:
-            raise ValueError("unsafe backup file")
         try:
-            envelope = json.loads(path.read_text(encoding="utf-8"))
+            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+            with os.fdopen(fd, "r", encoding="utf-8") as stream:
+                mode = os.fstat(stream.fileno()).st_mode
+                if not stat.S_ISREG(mode) or mode & 0o077:
+                    raise ValueError("unsafe backup file")
+                envelope = json.load(stream)
             payload = envelope["payload"]
             canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
             if hashlib.sha256(canonical.encode()).hexdigest() != envelope["sha256"]:
@@ -92,7 +96,7 @@ class BackupStore:
             if payload["schema"] != 1 or payload["transaction_id"] != backup_id or payload["fingerprint"] != fingerprint or payload["keys"] != list(allowlist) or set(payload["values"]) != set(allowlist):
                 raise ValueError("backup identity failure")
             return {key: Value(**payload["values"][key]) for key in allowlist}
-        except (KeyError, TypeError, json.JSONDecodeError, UnicodeError) as exc:
+        except (KeyError, TypeError, json.JSONDecodeError, UnicodeError, OSError) as exc:
             raise ValueError("corrupt backup") from exc
 
     def restore(self, backup_id: str, fingerprint: str, allowlist: tuple[str, ...],

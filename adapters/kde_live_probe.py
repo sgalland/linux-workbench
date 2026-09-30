@@ -33,7 +33,7 @@ def _property(name):
 
 
 def _config_value(key):
-    if key not in CONFIG_KEYS:
+    if key not in CONFIG_KEYS + ("Id_5",):
         raise ValueError("key outside probe allowlist")
     sentinels = ["WORKBENCH_ABSENT_" + secrets.token_hex(16) for _ in range(2)]
     outputs = []
@@ -58,6 +58,10 @@ def collect():
         raise ValueError("inconsistent KWin desktop property")
     state = State(tuple(Desktop(row[1], row[2]) for row in desktop_rows), current, rows)
     config = {key: _config_value(key) for key in CONFIG_KEYS}
+    # KWin's save loop deletes consecutive Id_N keys after the current count.
+    # A pre-existing Id_5 would be deleted when returning from four to one.
+    if _config_value("Id_5").present:
+        raise ValueError("unexpected fifth desktop config ID blocks exact rollback")
     version = _run(["kwin_wayland", "--version"]).strip()
     if version != "kwin 6.7.5":
         raise ValueError("unsupported KWin version")

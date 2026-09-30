@@ -20,14 +20,14 @@ class FixtureAuthorization:
 
 
 def authorize_fixture(tx: Transaction, state: kde.State) -> FixtureAuthorization:
-    if tx.status != Status.AUTHORIZATION_REQUIRED or tx.preconditions[0] != ("runtime_sha256", state.digest()):
+    if tx.status != Status.AUTHORIZATION_REQUIRED or tx.preconditions[0] != ("runtime_sha256", state.digest()) or not any(key == "config_sha256" for key, _ in tx.preconditions):
         raise ValueError("plan is not ready for fixture authorization")
     return FixtureAuthorization(tx.transaction_id, tx.plan_fingerprint(), state.digest())
 
 
 def dry_run(backend: kde.Backend, transaction_id: str) -> dict[str, object]:
     state = backend.inspect()
-    tx = kde.plan(state, transaction_id).transition(Status.AUTHORIZATION_REQUIRED)
+    tx = kde.bind_config(kde.plan(state, transaction_id), backend).transition(Status.AUTHORIZATION_REQUIRED)
     # Check exactly the planned backup scope without returning private values.
     for key in tx.backup_keys:
         kde.backup_value(backend, state, key)
@@ -47,8 +47,10 @@ def run_fixture(backend: kde.Backend, tx: Transaction, auth: FixtureAuthorizatio
     if not isinstance(auth, FixtureAuthorization) or auth.scope != "fixture-only":
         raise ValueError("fixture authorization required")
     state = backend.inspect()
+    current_config = kde.bind_config(kde.plan(state, tx.transaction_id), backend).preconditions[-1]
     if (auth.transaction_id != tx.transaction_id or auth.fingerprint != tx.plan_fingerprint()
-            or auth.prestate_digest != state.digest() or tx.preconditions[0] != ("runtime_sha256", state.digest())):
+            or auth.prestate_digest != state.digest() or tx.preconditions[0] != ("runtime_sha256", state.digest())
+            or current_config not in tx.preconditions):
         raise ValueError("authorization or pre-state mismatch")
     tx = tx.transition(Status.AUTHORIZED)
     fingerprint = tx.plan_fingerprint()

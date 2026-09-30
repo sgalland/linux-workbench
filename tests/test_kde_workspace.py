@@ -1,6 +1,6 @@
 import unittest
 
-from adapters.kde_workspace import BACKUP_KEYS, CONFIG_KEYS, Desktop, State, TARGET, apply, backup_value, plan, rollback, verify
+from adapters.kde_workspace import BACKUP_KEYS, CONFIG_KEYS, Desktop, State, TARGET, apply, backup_value, bind_config, plan, rollback, verify
 from workbenchlib.backup import Value
 
 
@@ -43,7 +43,7 @@ class WorkspaceTests(unittest.TestCase):
     def test_apply_verify_rollback(self):
         backend = Fixture()
         before = backend.inspect()
-        tx = plan(before, "fixture-v1")
+        tx = bind_config(plan(before, "fixture-v1"), backend)
         self.assertEqual(tx.adapter, "kde-kwin-6-7")
         values = {key: backup_value(backend, before, key) for key in BACKUP_KEYS}
         apply(backend, before)
