@@ -16,7 +16,7 @@ Describe how desired intent and observed state can be compared, and how proposed
 
 ## v0.4 — KDE Plasma feasibility investigation
 
-Investigate whether KDE Plasma can support the desired desktop behaviors through an adapter. Keep findings and limitations separate from the abstract specification. Do not change desktop configuration as part of investigation without explicit approval.
+Batch 003 completed the read-only feasibility investigation and produced a candidate KDE adapter, portable desktop intent, and [review gate](reviews/workbench-batch-003-review.md). Four named virtual desktops are the current recommendation, pending human review. No desktop configuration was changed. This boundary does not authorize v0.5.
 
 ## v0.5 — First controlled reversible mutation
 
