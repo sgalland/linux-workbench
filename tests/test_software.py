@@ -53,3 +53,14 @@ class SoftwareEvidenceTests(unittest.TestCase):
         self.assertEqual(plan(desired, snap("absent"), mapping)["entries"][0]["classification"], "missing")
         self.assertEqual(plan(desired, snap("unknown"), mapping)["entries"][0]["classification"], "observation-unknown")
         self.assertEqual(compare(snap("present"), snap("unknown"))["changes"][0]["classification"], "unknown")
+
+    def test_compatibility_sources_are_explicitly_deferred(self):
+        from adapters.software import CATALOG
+        with tempfile.TemporaryDirectory() as directory:
+            rows = discover(Path(directory), path_env="/no-tools-here", catalog=CATALOG,
+                            application_roots=(Path(directory),))
+        states = {row["id"]: row["state"] for row in rows}
+        for name in ("chatgpt", "modernuo", "ultima-online", "star-trek-fleet-command", "gog-galaxy"):
+            self.assertEqual(states[f"software.{name}"], "unknown")
+        self.assertEqual(states["software.insync"], "absent")
+        self.assertEqual(states["software.anydesk"], "absent")

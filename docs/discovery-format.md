@@ -65,6 +65,14 @@ licenses, or account data. Versions are not collected. Each IDE is compared
 and planned independently; a missing or inaccessible marker affects only its
 own evidence row.
 
+Exact command checks also cover Insync, AnyDesk, and Codex CLI. Their absence
+means the named command is not exposed through the current PATH; it cannot
+prove that no other installation exists. ChatGPT desktop, ModernUO, Ultima
+Online, Star Trek Fleet Command, and GOG Galaxy are explicit deferred rows
+with unknown state. No Wine prefix, registry, game library, account directory,
+or private application data is inspected. These rows remain unknown in plans
+until a safe deterministic source is reviewed.
+
 `settings_surfaces` checks only a fixed catalog in `adapters/surfaces.py`.
 Each row contains a logical ID, category, and `present`/`absent`/`unknown`
 state. Individual permission or filesystem failures become `unknown`; the

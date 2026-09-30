@@ -19,6 +19,14 @@ CATALOG = (
     ("software.rider", "launcher.rider", "launcher", "desktop", "jetbrains-rider.desktop"),
     ("software.clion", "launcher.clion", "launcher", "desktop", "jetbrains-clion.desktop"),
     ("software.webstorm", "launcher.webstorm", "launcher", "desktop", "jetbrains-webstorm.desktop"),
+    ("software.insync", "command.insync", "command", "command", "insync"),
+    ("software.anydesk", "command.anydesk", "command", "command", "anydesk"),
+    ("software.codex", "command.codex", "command", "command", "codex"),
+    ("software.chatgpt", "deferred.chatgpt", "manual", "deferred", ""),
+    ("software.modernuo", "deferred.modernuo", "manual", "deferred", ""),
+    ("software.ultima-online", "deferred.ultima-online", "manual", "deferred", ""),
+    ("software.star-trek-fleet-command", "deferred.star-trek-fleet-command", "manual", "deferred", ""),
+    ("software.gog-galaxy", "deferred.gog-galaxy", "manual", "deferred", ""),
 )
 
 
