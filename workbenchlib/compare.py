@@ -29,7 +29,7 @@ def validate_snapshot(document: dict) -> None:
 
 
 def _known(probe: dict | None) -> bool:
-    return bool(probe and probe.get("status") == "ok" and (probe.get("observation") in {"present", "not_present"} or probe.get("id") == "settings_surfaces" and probe.get("observation") == "unknown"))
+    return bool(probe and probe.get("status") == "ok" and (probe.get("observation") in {"present", "not_present"} or probe.get("id") in {"settings_surfaces", "software_targeted"} and probe.get("observation") == "unknown"))
 
 
 def _items(probe: dict | None) -> dict[str, object]:
@@ -47,6 +47,11 @@ def _items(probe: dict | None) -> dict[str, object]:
         if not isinstance(rows, list):
             raise ValueError("invalid settings facts")
         return {f"{name}/{row['id']}": (row.get("category"), row.get("state")) for row in rows if isinstance(row, dict) and isinstance(row.get("id"), str)}
+    if name == "software_targeted":
+        rows = facts.get("evidence", [])
+        if not isinstance(rows, list):
+            raise ValueError("invalid targeted software facts")
+        return {f"{name}/{row['evidence_id']}": row.get("state") for row in rows if isinstance(row, dict) and isinstance(row.get("evidence_id"), str)}
     return {name: (probe["observation"], facts)}
 
 
@@ -64,7 +69,7 @@ def compare(older: dict, newer: dict) -> dict:
             keys = {name}
         for key in sorted(keys):
             a, b = left.get(key), right.get(key)
-            if not _known(old) or not _known(new) or (name == "settings_surfaces" and (isinstance(a, tuple) and a[1] == "unknown" or isinstance(b, tuple) and b[1] == "unknown")):
+            if not _known(old) or not _known(new) or (name == "settings_surfaces" and (isinstance(a, tuple) and a[1] == "unknown" or isinstance(b, tuple) and b[1] == "unknown")) or (name == "software_targeted" and (a == "unknown" or b == "unknown")):
                 classification = "unknown"
             elif key not in left:
                 classification = "added"

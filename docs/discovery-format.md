@@ -59,6 +59,11 @@ contents, arbitrary discovered names, or raw metadata. An unreadable marker
 or a missing PATH yields unknown; a symlink marker is not followed. This is
 evidence of presence only, separate from desired intent. Additional reviewed
 evidence kinds can be added without scanning application directories.
+The catalog includes exact JetBrains IDE launcher IDs and a Toolbox command
+check. It does not open Toolbox metadata, user settings, projects, plugins,
+licenses, or account data. Versions are not collected. Each IDE is compared
+and planned independently; a missing or inaccessible marker affects only its
+own evidence row.
 
 `settings_surfaces` checks only a fixed catalog in `adapters/surfaces.py`.
 Each row contains a logical ID, category, and `present`/`absent`/`unknown`

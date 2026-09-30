@@ -7,7 +7,7 @@ from pathlib import Path
 LOGICAL = re.compile(r"[a-z][a-z0-9]*(?:[.-][a-z0-9]+)+\Z")
 PACKAGE = re.compile(r"[a-z0-9][a-z0-9@._+-]*\Z")
 FLATPAK = re.compile(r"[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+){2,}\Z")
-SOURCES = {"repo", "foreign", "flatpak"}
+SOURCES = {"repo", "foreign", "flatpak", "targeted"}
 
 
 def _object_keys(value, required):
@@ -37,7 +37,7 @@ def validate_mapping(document: dict) -> dict:
     for row in document["software"]:
         if not _object_keys(row, {"logical_id", "source", "identifier"}) or not isinstance(row["logical_id"], str) or not LOGICAL.fullmatch(row["logical_id"]) or not row["logical_id"].startswith("software.") or not isinstance(row["source"], str) or row["source"] not in SOURCES or not isinstance(row["identifier"], str):
             raise ValueError("invalid software mapping")
-        pattern = FLATPAK if row["source"] == "flatpak" else PACKAGE
+        pattern = FLATPAK if row["source"] == "flatpak" else LOGICAL if row["source"] == "targeted" else PACKAGE
         if not pattern.fullmatch(row["identifier"]):
             raise ValueError("invalid mapped identifier")
     return document

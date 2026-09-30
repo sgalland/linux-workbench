@@ -24,6 +24,13 @@ def plan(desired: dict, snapshot: dict, mapping: dict) -> dict:
             available[source] = None
         else:
             available[source] = set(ids)
+    targeted = probes.get("software_targeted")
+    targeted_states = None
+    if targeted and targeted.get("status") == "ok" and isinstance(targeted.get("facts", {}).get("evidence"), list):
+        targeted_states = {}
+        for row in targeted["facts"]["evidence"]:
+            if isinstance(row, dict) and isinstance(row.get("evidence_id"), str) and row.get("state") in {"present", "absent", "unknown"}:
+                targeted_states[row["evidence_id"]] = row["state"]
     mappings = mapping["software"]
     target_counts = Counter((row["source"], row["identifier"]) for row in mappings)
     entries = []
@@ -37,8 +44,12 @@ def plan(desired: dict, snapshot: dict, mapping: dict) -> dict:
             state = "ambiguous/conflicting-mapping"
         else:
             row = candidates[0]
-            observed = available[row["source"]]
-            state = "observation-unknown" if observed is None else "satisfied" if row["identifier"] in observed else "missing"
+            if row["source"] == "targeted":
+                observed_state = targeted_states.get(row["identifier"], "unknown") if targeted_states is not None else "unknown"
+                state = {"present": "satisfied", "absent": "missing", "unknown": "observation-unknown"}[observed_state]
+            else:
+                observed = available[row["source"]]
+                state = "observation-unknown" if observed is None else "satisfied" if row["identifier"] in observed else "missing"
         entries.append({"kind": "software", "id": item["id"], "intent": item["intent"], "review_category": item["review_category"], "classification": state})
     # Settings intent is portable; no settings implementation mapping exists yet.
     for item in sorted(desired["settings_surfaces"], key=lambda x: x["id"]):
@@ -50,4 +61,8 @@ def plan(desired: dict, snapshot: dict, mapping: dict) -> dict:
         for identifier in sorted(observed):
             if (source, identifier) not in mapped_targets:
                 entries.append({"kind": "software", "source": source, "identifier": identifier, "classification": "observed-but-unmanaged"})
+    if targeted_states is not None:
+        for identifier in sorted(targeted_states):
+            if targeted_states[identifier] == "present" and ("targeted", identifier) not in mapped_targets:
+                entries.append({"kind": "software", "source": "targeted", "identifier": identifier, "classification": "observed-but-unmanaged"})
     return {"schema_version": 1, "proposal_only": True, "entries": entries}

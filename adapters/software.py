@@ -14,6 +14,11 @@ CATALOG = (
     ("software.obsidian", "launcher.obsidian", "launcher", "desktop", "obsidian.desktop"),
     ("software.spotify", "launcher.spotify", "launcher", "desktop", "spotify.desktop"),
     ("software.brave", "launcher.brave", "launcher", "desktop", "brave-browser.desktop"),
+    ("software.jetbrains-toolbox", "command.jetbrains-toolbox", "command", "command", "jetbrains-toolbox"),
+    ("software.pycharm", "launcher.pycharm", "launcher", "desktop", "jetbrains-pycharm.desktop"),
+    ("software.rider", "launcher.rider", "launcher", "desktop", "jetbrains-rider.desktop"),
+    ("software.clion", "launcher.clion", "launcher", "desktop", "jetbrains-clion.desktop"),
+    ("software.webstorm", "launcher.webstorm", "launcher", "desktop", "jetbrains-webstorm.desktop"),
 )
 
 
