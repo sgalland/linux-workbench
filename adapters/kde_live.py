@@ -26,6 +26,9 @@ EXPECTED = {
     "current": ("property", "s", ""),
     "desktops": ("property", "a(iss)", ""),
 }
+# The v6.7.5 XML advertises a(iss), but its uint-position C++ marshaller
+# produces a(uss) on the wire. Keep these two checks independent and exact.
+DESKTOPS_WIRE_SIGNATURE = "a(uss)"
 
 
 def subprocess_runner(argv):
@@ -81,7 +84,7 @@ class KWinBackend:
             raise ValueError("malformed property reply") from exc
 
     def inspect(self):
-        rows = self._property("desktops", "a(iss)")
+        rows = self._property("desktops", DESKTOPS_WIRE_SIGNATURE)
         count = self._property("count", "u")
         current = self._property("current", "s")
         row_count = self._property("rows", "u")

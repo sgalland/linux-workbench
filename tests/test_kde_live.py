@@ -14,7 +14,7 @@ class Runner:
         self.calls = []
         self.version = "kwin 6.7.5\n"
         self.surface = SURFACE
-        self.properties = {"desktops": ("a(iss)", [[0, "original", "private"]]),
+        self.properties = {"desktops": ("a(uss)", [[0, "original", "private"]]),
                            "count": ("u", 1), "current": ("s", "original"), "rows": ("u", 1)}
         self.config = {}
         self.fail = False
@@ -69,6 +69,36 @@ class LiveBackendTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.backend.validate_surface()
 
+    def test_desktops_wire_signature_is_exact(self):
+        self.backend.validate_surface()
+        self.assertEqual(self.backend.inspect().desktops[0].id, "original")
+        for signature in ("a(iss)", "a(sss)", "a(uss)s"):
+            with self.subTest(signature=signature):
+                self.runner.properties["desktops"] = (signature, [[0, "original", "private"]])
+                with self.assertRaises(ValueError):
+                    self.backend.inspect()
+
+    def test_desktops_position_validation(self):
+        for positions in ((-1,), (True,), (1,), (0, 2)):
+            with self.subTest(positions=positions):
+                self.runner.properties["desktops"] = ("a(uss)",
+                    [[position, f"id-{i}", f"name-{i}"] for i, position in enumerate(positions)])
+                self.runner.properties["count"] = ("u", len(positions))
+                self.runner.properties["current"] = ("s", "id-0")
+                with self.assertRaises(ValueError):
+                    self.backend.inspect()
+
+    def test_other_payload_validation(self):
+        for rows, count, current in (([[0, "id", 4]], 1, "id"),
+                                     ([[0, "id", "name"]], 2, "id"),
+                                     ([[0, "id", "name"]], 1, "unknown")):
+            with self.subTest(rows=rows, count=count, current=current):
+                self.runner.properties["desktops"] = ("a(uss)", rows)
+                self.runner.properties["count"] = ("u", count)
+                self.runner.properties["current"] = ("s", current)
+                with self.assertRaises(ValueError):
+                    self.backend.inspect()
+
     def test_drifted_surface(self):
         self.runner.version = "kwin 6.7.6"
         with self.assertRaises(ValueError):
@@ -77,6 +107,15 @@ class LiveBackendTests(unittest.TestCase):
         for member in EXPECTED:
             self.runner.surface = SURFACE.replace(member + " ", "missing ")
             with self.assertRaises(ValueError):
+                self.backend.validate_surface()
+        for member, (kind, ins, outs) in EXPECTED.items():
+            original = f"{member} {kind} {ins or '-'} {outs or '-'}"
+            changed = f"{member} {kind} changed {outs or '-'}"
+            self.runner.surface = SURFACE.replace(original, changed)
+            with self.subTest(member=member), self.assertRaises(ValueError):
+                self.backend.validate_surface()
+            self.runner.surface = SURFACE.replace(original, f"{member} method {ins or '-'} s")
+            with self.subTest(member=member, field="kind-or-return"), self.assertRaises(ValueError):
                 self.backend.validate_surface()
 
     def test_config_present_absent_and_allowlist(self):
