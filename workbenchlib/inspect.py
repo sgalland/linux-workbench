@@ -17,9 +17,10 @@ from pathlib import Path
 from typing import Any, Callable
 
 from adapters.surfaces import discover as discover_surfaces
+from adapters.software import discover as discover_software
 
 SCHEMA_VERSION = 1
-COLLECTOR_VERSION = "0.3.0"
+COLLECTOR_VERSION = "0.4.0"
 TIMEOUT_SECONDS = 8
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = REPO_ROOT / ".workbench" / "inspections"
@@ -477,6 +478,8 @@ def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = 
     ])
     surfaces = discover_surfaces(home if home is not None else Path.home(), etc)
     probes.append({"id": "settings_surfaces", "status": "ok", "observation": "present" if all(s["state"] != "unknown" for s in surfaces) else "unknown", "facts": {"surfaces": surfaces}, "provenance": {"kind": "reviewed_surface_catalog", "catalog": "adapters.surfaces:v1"}})
+    evidence = discover_software(home if home is not None else Path.home())
+    probes.append({"id": "software_targeted", "status": "ok", "observation": "unknown" if any(row["state"] == "unknown" for row in evidence) else "present", "facts": {"evidence": evidence}, "provenance": {"kind": "reviewed_software_catalog", "catalog": "adapters.software:v1"}})
 
     # Session facts contain only coarse, normalized values; raw environment is
     # never copied. Probe facility readiness with fixed display clients.

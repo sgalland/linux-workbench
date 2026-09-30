@@ -48,8 +48,17 @@ Software inventory has three separate probes: `software_repo_explicit` uses
 Each retains sorted, unique package/application IDs only. The source class is
 the probe ID; versions, descriptions, origins, and raw output are discarded.
 Missing tools and failed or malformed output are unknown, never an empty
-installed set. AppImages, manual desktop files, Wine/game libraries, and
-JetBrains Toolbox internals remain outside this inventory.
+installed set. This broad package inventory does not inspect manual installs,
+Wine/game libraries, or JetBrains Toolbox internals.
+
+`software_targeted` uses a fixed adapter catalog of exact command names and
+desktop IDs. Each evidence row contains only a portable logical ID, stable
+evidence ID, source class (`command` or `launcher`), and
+`present`/`absent`/`unknown` state. It never stores command paths, desktop
+contents, arbitrary discovered names, or raw metadata. An unreadable marker
+or a missing PATH yields unknown; a symlink marker is not followed. This is
+evidence of presence only, separate from desired intent. Additional reviewed
+evidence kinds can be added without scanning application directories.
 
 `settings_surfaces` checks only a fixed catalog in `adapters/surfaces.py`.
 Each row contains a logical ID, category, and `present`/`absent`/`unknown`
