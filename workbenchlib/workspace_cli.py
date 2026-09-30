@@ -72,5 +72,6 @@ def main(args, *, backend_factory=KWinBackend, repo_root=REPO_ROOT, check_sessio
         print(json.dumps(result, sort_keys=True))
         return 0 if result["status"] in {"authorization-required", "authorized", "verified", "rolled-back"} else 1
     except (ValueError, OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
-        print(f"workspace-pilot: {type(exc).__name__}: operation refused", file=sys.stderr)
+        reason = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
+        print(f"workspace-pilot: {reason}", file=sys.stderr)
         return 2

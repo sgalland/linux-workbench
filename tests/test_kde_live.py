@@ -14,7 +14,7 @@ class Runner:
         self.calls = []
         self.version = "kwin 6.7.5\n"
         self.surface = SURFACE
-        self.properties = {"desktops": ("a(uss)", [[0, "original", "private"]]),
+        self.properties = {"desktops": ("a(iss)", [[0, "original", "private"]]),
                            "count": ("u", 1), "current": ("s", "original"), "rows": ("u", 1)}
         self.config = {}
         self.fail = False

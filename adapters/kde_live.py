@@ -18,13 +18,13 @@ SERVICE = "org.kde.KWin"
 OBJECT = "/VirtualDesktopManager"
 INTERFACE = "org.kde.KWin.VirtualDesktopManager"
 EXPECTED = {
-    "createDesktop": ("method", "us", "s"),
+    "createDesktop": ("method", "us", ""),
     "setDesktopName": ("method", "ss", ""),
     "removeDesktop": ("method", "s", ""),
     "count": ("property", "u", ""),
     "rows": ("property", "u", ""),
     "current": ("property", "s", ""),
-    "desktops": ("property", "a(uss)", ""),
+    "desktops": ("property", "a(iss)", ""),
 }
 
 
@@ -41,7 +41,10 @@ class KWinBackend:
         try:
             return self.runner(argv)
         except (OSError, subprocess.SubprocessError) as exc:
-            raise ValueError("KWin command failed") from exc
+            step = "introspection" if "introspect" in argv else (
+                "property read" if "get-property" in argv else (
+                    "version" if argv[0] == "kwin_wayland" else "config read" if argv[0] == "kreadconfig6" else "mutation"))
+            raise ValueError(f"KWin {step} command failed") from exc
 
     def validate_surface(self):
         if self._run(["kwin_wayland", "--version"]).strip() != "kwin 6.7.5":
@@ -50,6 +53,8 @@ class KWinBackend:
         found = {}
         for line in output.splitlines():
             fields = line.split()
+            if fields:
+                fields[0] = fields[0].removeprefix(INTERFACE + ".").removeprefix(".")
             if len(fields) >= 2 and fields[0] in EXPECTED:
                 if fields[0] in found:
                     raise ValueError("duplicate KWin interface member")
@@ -57,12 +62,12 @@ class KWinBackend:
         for name, (kind, input_sig, output_sig) in EXPECTED.items():
             fields = found.get(name)
             if fields is None or fields[1] != kind:
-                raise ValueError("unsupported KWin interface")
+                raise ValueError(f"unsupported KWin interface member: {name}")
             if kind == "method":
                 if len(fields) < 4 or fields[2:4] != [input_sig or "-", output_sig or "-"]:
-                    raise ValueError("unsupported KWin method signature")
+                    raise ValueError(f"unsupported KWin method signature: {name} ({','.join(fields[2:4])})")
             elif len(fields) < 3 or fields[2] != input_sig:
-                raise ValueError("unsupported KWin property signature")
+                raise ValueError(f"unsupported KWin property signature: {name} ({fields[2] if len(fields) > 2 else '-'})")
 
     def _property(self, name, signature):
         if name not in {"count", "rows", "current", "desktops"}:
@@ -70,13 +75,13 @@ class KWinBackend:
         try:
             reply = json.loads(self._run(["busctl", "--user", "--json=short", "get-property", SERVICE, OBJECT, INTERFACE, name]))
             if reply["type"] != signature or set(reply) != {"type", "data"}:
-                raise ValueError("unexpected property reply")
+                raise ValueError(f"unexpected property reply: {name}, type={reply.get('type')}, keys={','.join(sorted(reply))}")
             return reply["data"]
         except (KeyError, TypeError, json.JSONDecodeError) as exc:
             raise ValueError("malformed property reply") from exc
 
     def inspect(self):
-        rows = self._property("desktops", "a(uss)")
+        rows = self._property("desktops", "a(iss)")
         count = self._property("count", "u")
         current = self._property("current", "s")
         row_count = self._property("rows", "u")
