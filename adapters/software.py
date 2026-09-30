@@ -22,6 +22,7 @@ CATALOG = (
     ("software.insync", "command.insync", "command", "command", "insync"),
     ("software.anydesk", "command.anydesk", "command", "command", "anydesk"),
     ("software.codex", "command.codex", "command", "command", "codex"),
+    ("software.github-cli", "command.gh", "command", "command", "gh"),
     ("software.chatgpt", "deferred.chatgpt", "manual", "deferred", ""),
     ("software.modernuo", "deferred.modernuo", "manual", "deferred", ""),
     ("software.ultima-online", "deferred.ultima-online", "manual", "deferred", ""),

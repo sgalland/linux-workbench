@@ -1,4 +1,115 @@
 {
   "schema_version": 1,
-  "software": []
+  "software": [
+    {
+      "logical_id": "software.chatgpt",
+      "source": "targeted",
+      "identifier": "deferred.chatgpt"
+    },
+    {
+      "logical_id": "software.codex",
+      "source": "targeted",
+      "identifier": "command.codex"
+    },
+    {
+      "logical_id": "software.spotify",
+      "source": "targeted",
+      "identifier": "launcher.spotify"
+    },
+    {
+      "logical_id": "software.brave",
+      "source": "targeted",
+      "identifier": "launcher.brave"
+    },
+    {
+      "logical_id": "software.blender",
+      "source": "targeted",
+      "identifier": "command.blender"
+    },
+    {
+      "logical_id": "software.krita",
+      "source": "targeted",
+      "identifier": "command.krita"
+    },
+    {
+      "logical_id": "software.inkscape",
+      "source": "targeted",
+      "identifier": "command.inkscape"
+    },
+    {
+      "logical_id": "software.vscode",
+      "source": "targeted",
+      "identifier": "command.code"
+    },
+    {
+      "logical_id": "software.obsidian",
+      "source": "targeted",
+      "identifier": "launcher.obsidian"
+    },
+    {
+      "logical_id": "software.godot",
+      "source": "targeted",
+      "identifier": "command.godot"
+    },
+    {
+      "logical_id": "software.jetbrains-toolbox",
+      "source": "targeted",
+      "identifier": "command.jetbrains-toolbox"
+    },
+    {
+      "logical_id": "software.pycharm",
+      "source": "targeted",
+      "identifier": "launcher.pycharm"
+    },
+    {
+      "logical_id": "software.rider",
+      "source": "targeted",
+      "identifier": "launcher.rider"
+    },
+    {
+      "logical_id": "software.clion",
+      "source": "targeted",
+      "identifier": "launcher.clion"
+    },
+    {
+      "logical_id": "software.webstorm",
+      "source": "targeted",
+      "identifier": "launcher.webstorm"
+    },
+    {
+      "logical_id": "software.anydesk",
+      "source": "targeted",
+      "identifier": "command.anydesk"
+    },
+    {
+      "logical_id": "software.github-cli",
+      "source": "targeted",
+      "identifier": "command.gh"
+    },
+    {
+      "logical_id": "software.insync",
+      "source": "targeted",
+      "identifier": "command.insync"
+    },
+    {
+      "logical_id": "software.modernuo",
+      "source": "targeted",
+      "identifier": "deferred.modernuo"
+    },
+    {
+      "logical_id": "software.ultima-online",
+      "source": "targeted",
+      "identifier": "deferred.ultima-online"
+    },
+    {
+      "logical_id": "software.star-trek-fleet-command",
+      "source": "targeted",
+      "identifier": "deferred.star-trek-fleet-command"
+    },
+    {
+      "logical_id": "software.gog-galaxy",
+      "source": "targeted",
+      "identifier": "deferred.gog-galaxy"
+    }
+  ]
 }

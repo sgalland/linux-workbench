@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "software": [
+    {
+      "id": "software.chatgpt",
+      "intent": "undecided",
+      "review_category": "communication"
+    },
+    {
+      "id": "software.codex",
+      "intent": "undecided",
+      "review_category": "development"
+    },
+    {
+      "id": "software.spotify",
+      "intent": "undecided",
+      "review_category": "communication"
+    },
+    {
+      "id": "software.brave",
+      "intent": "undecided",
+      "review_category": "productivity"
+    },
+    {
+      "id": "software.blender",
+      "intent": "undecided",
+      "review_category": "creative"
+    },
+    {
+      "id": "software.krita",
+      "intent": "undecided",
+      "review_category": "creative"
+    },
+    {
+      "id": "software.inkscape",
+      "intent": "undecided",
+      "review_category": "creative"
+    },
+    {
+      "id": "software.vscode",
+      "intent": "undecided",
+      "review_category": "development"
+    },
+    {
+      "id": "software.obsidian",
+      "intent": "undecided",
+      "review_category": "productivity"
+    },
+    {
+      "id": "software.godot",
+      "intent": "undecided",
+      "review_category": "development"
+    },
+    {
+      "id": "software.jetbrains-toolbox",
+      "intent": "undecided",
+      "review_category": "development"
+    },
+    {
+      "id": "software.pycharm",
+      "intent": "undecided",
+      "review_category": "development"
+    },
+    {
+      "id": "software.rider",
+      "intent": "undecided",
+      "review_category": "development"
+    },
+    {
+      "id": "software.clion",
+      "intent": "undecided",
+      "review_category": "development"
+    },
+    {
+      "id": "software.webstorm",
+      "intent": "undecided",
+      "review_category": "development"
+    },
+    {
+      "id": "software.anydesk",
+      "intent": "undecided",
+      "review_category": "productivity"
+    },
+    {
+      "id": "software.github-cli",
+      "intent": "undecided",
+      "review_category": "development"
+    },
+    {
+      "id": "software.insync",
+      "intent": "undecided",
+      "review_category": "cloud"
+    },
+    {
+      "id": "software.modernuo",
+      "intent": "undecided",
+      "review_category": "gaming"
+    },
+    {
+      "id": "software.ultima-online",
+      "intent": "undecided",
+      "review_category": "gaming"
+    },
+    {
+      "id": "software.star-trek-fleet-command",
+      "intent": "undecided",
+      "review_category": "gaming"
+    },
+    {
+      "id": "software.gog-galaxy",
+      "intent": "undecided",
+      "review_category": "gaming"
+    }
+  ],
+  "settings_surfaces": []
+}

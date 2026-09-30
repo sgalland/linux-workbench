@@ -23,7 +23,7 @@ def validate_desired(document: dict) -> dict:
         if not isinstance(rows, list):
             raise ValueError("invalid desired-state rows")
         for row in rows:
-            if not _object_keys(row, {"id", "intent", "review_category"}) or not isinstance(row["id"], str) or not LOGICAL.fullmatch(row["id"]) or not isinstance(row["intent"], str) or row["intent"] not in {"required", "optional"} or not isinstance(row["review_category"], str) or not LOGICAL.fullmatch("category." + row["review_category"]):
+            if not _object_keys(row, {"id", "intent", "review_category"}) or not isinstance(row["id"], str) or not LOGICAL.fullmatch(row["id"]) or not isinstance(row["intent"], str) or row["intent"] not in {"required", "optional", "undecided"} or not isinstance(row["review_category"], str) or not LOGICAL.fullmatch("category." + row["review_category"]):
                 raise ValueError("invalid desired-state entry")
             if not row["id"].startswith("software." if kind == "software" else "settings.") or row["id"] in seen:
                 raise ValueError("invalid or duplicate logical ID")
