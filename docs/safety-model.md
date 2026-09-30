@@ -23,3 +23,10 @@ Never expose, commit, print, or request secrets or API keys. Back up mutable con
 ## Current scope
 
 This initial scaffold documents the safety model and project intent only. The HP Envy laptop's problematic Bang & Olufsen internal-speaker configuration is explicitly deferred; do not diagnose or change it under this scaffold.
+
+`./workbench plan` classifies portable intent against a sanitized snapshot
+using data-only adapter mappings. Its output is a proposal for review, not
+authorization. `missing` describes an observed gap, including for optional
+intent; it is not an install instruction. Unknown observations suppress that
+classification, and unmanaged installed software produces no removal action.
+There is no apply command or mutation path in this batch.

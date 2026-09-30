@@ -17,3 +17,7 @@ Each mapping names a logical software ID, source (`repo`, `foreign`, or
 `flatpak`), and the concrete identifier. Mappings grant no installation
 authority. Multiple mappings may be supplied for review; the planner treats
 conflicts conservatively.
+
+`adapters/cachyos-software.json` is the operational mapping data read by the
+CLI. It starts empty. The `.example.json` file is illustrative and is not
+loaded by the CLI.
