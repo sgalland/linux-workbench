@@ -15,7 +15,7 @@ Agents can inspect current state, help develop a plan, and investigate unfamilia
 
 ## Read-only discovery design
 
-For v0.2, discovery should eventually use deterministic local collection code running in the normal user session. The collector should summarize and sanitize relevant system, desktop, device, and session facts into reviewable output. Agents should analyze that sanitized output rather than depend on their own execution sandbox having direct access to every desktop, audio, USB, or user-session facility. Collection should remain read-only and must not imply authorization to apply a plan.
+Discovery uses deterministic local collection code intended for the normal user session. The collector summarizes and sanitizes relevant system, desktop, device, and session facts into reviewable output. Agents should analyze that sanitized output rather than depend on their own execution sandbox having direct access to every desktop, audio, USB, or user-session facility. Collection remains read-only and does not imply authorization to apply a plan.
 
 Reviewed settings-surface paths and categories live in `adapters/surfaces.py`,
 including the small KDE Plasma set. The collector only checks metadata for

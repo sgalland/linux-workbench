@@ -22,7 +22,9 @@ Never expose, commit, print, or request secrets or API keys. Back up mutable con
 
 ## Current scope
 
-This initial scaffold documents the safety model and project intent only. The HP Envy laptop's problematic Bang & Olufsen internal-speaker configuration is explicitly deferred; do not diagnose or change it under this scaffold.
+The current Workbench commands are read-only inspection, comparison, and
+planning. The HP Envy laptop's problematic Bang & Olufsen internal-speaker
+configuration remains deferred; do not diagnose or change it under this batch.
 
 `./workbench plan` classifies portable intent against a sanitized snapshot
 using data-only adapter mappings. Its output is a proposal for review, not

@@ -18,7 +18,7 @@ The initial local Git repository convention on this CachyOS installation is `~/P
 
 The lifecycle for any future system configuration change is **inspect → plan → backup → apply → verify → rollback**. Agents must follow [`AGENTS.md`](AGENTS.md). Documentation and code changes in this repository may be made when requested; system changes require separate, explicit authorization as described there.
 
-No system-changing implementation is part of this initial documentation scaffold.
+No system-changing implementation is part of the current Workbench commands.
 
 ## Read-only commands
 
