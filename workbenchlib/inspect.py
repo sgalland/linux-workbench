@@ -402,28 +402,28 @@ def _probe_file(name: str, path: Path, parser: Callable[[str], tuple[str, dict[s
     try:
         content = path.read_text(encoding="utf-8", errors="replace")
     except FileNotFoundError:
-        return {"id": name, "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "file", "path": str(path), "parser": "workbenchlib.inspect:v1"}}
+        return {"id": name, "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "file", "parser": "workbenchlib.inspect:v1"}}
     except PermissionError:
-        return {"id": name, "status": "access_denied", "observation": "unknown", "facts": {}, "provenance": {"kind": "file", "path": str(path), "parser": "workbenchlib.inspect:v1"}}
+        return {"id": name, "status": "access_denied", "observation": "unknown", "facts": {}, "provenance": {"kind": "file", "parser": "workbenchlib.inspect:v1"}}
     except OSError:
-        return {"id": name, "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "file", "path": str(path), "parser": "workbenchlib.inspect:v1"}}
+        return {"id": name, "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "file", "parser": "workbenchlib.inspect:v1"}}
     try:
         observation, facts = parser(content)
-        return {"id": name, "status": "ok", "observation": observation, "facts": facts, "provenance": {"kind": "file", "path": str(path), "parser": "workbenchlib.inspect:v1"}}
+        return {"id": name, "status": "ok", "observation": observation, "facts": facts, "provenance": {"kind": "file", "parser": "workbenchlib.inspect:v1"}}
     except Exception:
-        return {"id": name, "status": "parse_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "file", "path": str(path), "parser": "workbenchlib.inspect:v1"}}
+        return {"id": name, "status": "parse_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "file", "parser": "workbenchlib.inspect:v1"}}
 
 
 def _probe_directory_count(name: str, path: Path) -> dict[str, Any]:
     try:
         count = sum(1 for _ in path.iterdir())
-        return {"id": name, "status": "ok", "observation": "present" if count else "not_present", "facts": {"entry_count": count}, "provenance": {"kind": "directory_count", "path": str(path)}}
+        return {"id": name, "status": "ok", "observation": "present" if count else "not_present", "facts": {"entry_count": count}, "provenance": {"kind": "directory_count"}}
     except FileNotFoundError:
-        return {"id": name, "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_count", "path": str(path)}}
+        return {"id": name, "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_count"}}
     except PermissionError:
-        return {"id": name, "status": "access_denied", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_count", "path": str(path)}}
+        return {"id": name, "status": "access_denied", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_count"}}
     except OSError:
-        return {"id": name, "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_count", "path": str(path)}}
+        return {"id": name, "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_count"}}
 
 
 def _probe_audio_sysfs(name: str, path: Path, *, filter_audio: bool = False) -> dict[str, Any]:
@@ -440,11 +440,11 @@ def _probe_audio_sysfs(name: str, path: Path, *, filter_audio: bool = False) -> 
             if filter_audio and not re.search(r"audio|sound|codec|amp|speaker|hda", entry.name + " " + driver, re.I):
                 continue
             rows.append(row)
-        return {"id": name, "status": "ok", "observation": "present" if rows else "not_present", "facts": {"devices": rows}, "provenance": {"kind": "sysfs_direct_children", "path": str(path)}}
+        return {"id": name, "status": "ok", "observation": "present" if rows else "not_present", "facts": {"devices": rows}, "provenance": {"kind": "sysfs_direct_children"}}
     except FileNotFoundError:
-        return {"id": name, "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "sysfs_direct_children", "path": str(path)}}
+        return {"id": name, "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "sysfs_direct_children"}}
     except OSError:
-        return {"id": name, "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "sysfs_direct_children", "path": str(path)}}
+        return {"id": name, "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "sysfs_direct_children"}}
 
 
 def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = Path("/sys"), etc: Path = Path("/etc"), home: Path | None = None) -> dict[str, Any]:
@@ -455,7 +455,7 @@ def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = 
     probes.append(_probe_command("kernel", ["uname", "-srm"], _parse_uname, runner))
     probes.append(_probe_command("cpu", ["lscpu"], _parse_lscpu, runner))
     probes.append(_probe_file("memory", proc / "meminfo", _parse_meminfo))
-    dmi_files = [sysfs / "class/dmi/id" / field for field in ("sys_vendor", "product_name", "product_version", "board_vendor", "board_name", "bios_vendor", "bios_version", "bios_date")]
+    dmi_files = [sysfs / "class/dmi/id" / field for field in ("sys_vendor", "product_name", "product_version", "board_vendor", "board_name", "bios_vendor", "bios_version")]
     # DMI strings can contain serial/asset identifiers. Exclude those fields;
     # keep only model/vendor/date fields from the explicit list above.
     dmi_fields = {}
@@ -466,7 +466,7 @@ def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = 
                 dmi_fields[path.name] = value[:100]
         except OSError:
             continue
-    probes.append({"id": "firmware_and_system", "status": "ok" if dmi_fields else "unavailable", "observation": "present" if dmi_fields else "unknown", "facts": dmi_fields, "provenance": {"kind": "files", "paths": [str(p) for p in dmi_files], "parser": "workbenchlib.inspect:v1"}})
+    probes.append({"id": "firmware_and_system", "status": "ok" if dmi_fields else "unavailable", "observation": "present" if dmi_fields else "unknown", "facts": dmi_fields, "provenance": {"kind": "files", "parser": "workbenchlib.inspect:v1"}})
     probes.append(_probe_command("storage", ["lsblk", "--json", "--output", "NAME,TYPE,SIZE,FSTYPE,ROTA,TRAN"], _parse_lsblk, runner))
     probes.append(_probe_command("pci", ["lspci", "-nnk"], _parse_pci, runner))
     probes.append(_probe_command("usb", ["lsusb"], _parse_lsusb, runner))
@@ -509,16 +509,15 @@ def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = 
     sound_path = sysfs / "class/sound"
     try:
         sound_names = sorted(p.name for p in sound_path.iterdir())
-        probes.append({"id": "sound_sysfs", "status": "ok", "observation": "present" if sound_names else "not_present", "facts": {"devices": [{"name": _safe_label(name)} for name in sound_names[:128]]}, "provenance": {"kind": "directory_names", "path": str(sound_path)}})
+        probes.append({"id": "sound_sysfs", "status": "ok", "observation": "present" if sound_names else "not_present", "facts": {"devices": [{"name": _safe_label(name)} for name in sound_names[:128]]}, "provenance": {"kind": "directory_names"}})
     except FileNotFoundError:
-        probes.append({"id": "sound_sysfs", "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_names", "path": str(sound_path)}})
+        probes.append({"id": "sound_sysfs", "status": "unavailable", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_names"}})
     except OSError:
-        probes.append({"id": "sound_sysfs", "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_names", "path": str(sound_path)}})
+        probes.append({"id": "sound_sysfs", "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "directory_names"}})
 
     return {
         "schema_version": SCHEMA_VERSION,
         "collector_version": COLLECTOR_VERSION,
-        "collected_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "completeness": {"probe_count": len(probes), "ok_count": sum(p["status"] == "ok" for p in probes), "incomplete_probe_ids": [p["id"] for p in probes if p["status"] != "ok" or p["observation"] == "unknown"], "complete": all(p["status"] == "ok" and p["observation"] != "unknown" for p in probes)},
         "probes": probes,
     }

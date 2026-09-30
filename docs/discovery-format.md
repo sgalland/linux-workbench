@@ -3,7 +3,7 @@
 `./workbench inspect` writes one sanitized JSON snapshot to
 `.workbench/inspections/`. That directory is ignored by Git. The collector
 does not stage or update the curated machine baseline. These ephemeral files
-include exact collection timestamps for local state comparison and are not
+do not include collection timestamps and are not
 intended for publication or automatic promotion into the public machine
 baseline.
 
@@ -11,7 +11,6 @@ baseline.
 
 - `schema_version` and `collector_version` identify the data and parser
   contract.
-- `collected_at` is a UTC timestamp.
 - `completeness` reports the probe count, successful probe count, IDs with an
   unavailable/error/not-collected/unknown result, and an overall complete
   flag.
@@ -24,7 +23,8 @@ Each probe record separates:
   `read_error`, or `not_collected`).
 - `observation`: `present`, `not_present`, or `unknown`.
 - `facts`: normalized values permitted for that probe.
-- `provenance`: fixed command arguments or source paths and parser identity.
+- `provenance`: fixed command arguments or source kind and parser identity;
+  no source paths.
 - `exit_code`, when a process returned an exit code.
 
 An unavailable or failed probe has `observation: unknown` and empty facts.

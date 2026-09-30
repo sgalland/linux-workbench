@@ -22,6 +22,12 @@ including the small KDE Plasma set. The collector only checks metadata for
 those fixed paths and emits logical IDs and presence states. Desktop file
 details do not enter the machine-independent specification.
 
+Reviewed application evidence lives in `adapters/software.py`. It checks only
+fixed commands and exact desktop markers; compatibility and game sources
+without safe deterministic markers remain unknown. The operational CachyOS
+mapping binds portable IDs to this read-only evidence. The 22-item candidate
+manifest remains undecided pending human review.
+
 Portable desired-state IDs, intent, and review categories are defined in
 `spec/desired-state.md`. CachyOS software identifiers live in a separate
 adapter mapping. Neither file is an apply mechanism; observed state is never

@@ -139,6 +139,8 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(probes["software_flatpak_apps"]["status"], "missing_tool")
         self.assertNotIn("private diagnostic", json.dumps(snapshot))
         self.assertNotIn('"secret"', json.dumps(snapshot))
+        self.assertNotIn("collected_at", snapshot)
+        self.assertTrue(all("path" not in p.get("provenance", {}) and "paths" not in p.get("provenance", {}) for p in snapshot["probes"]))
 
     def test_failed_probe_does_not_abort_and_snapshot_marks_unknown(self):
         def runner(argv, timeout):
