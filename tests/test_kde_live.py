@@ -4,6 +4,7 @@ import unittest
 
 from adapters.kde_live import KWinBackend, EXPECTED
 from workbenchlib.backup import Value
+from workbenchlib.workspace_pilot import current_plan
 
 
 SURFACE = "\n".join(f"{name} {kind} {ins or '-'} {outs or '-'}" for name, (kind, ins, outs) in EXPECTED.items())
@@ -98,6 +99,21 @@ class LiveBackendTests(unittest.TestCase):
                 self.runner.properties["current"] = ("s", current)
                 with self.assertRaises(ValueError):
                     self.backend.inspect()
+
+    def test_exact_signature_preflight_still_rejects_interface_drift(self):
+        state, transaction = current_plan(self.backend)
+        self.assertEqual(len(state.desktops), 1)
+        self.assertEqual(len(transaction.plan_fingerprint()), 64)
+        self.assertFalse(any(call[0] == "kwriteconfig6" or "call" in call
+                             for call in self.runner.calls))
+        self.runner.surface = SURFACE.replace("desktops property a(iss)",
+                                              "desktops property a(uss)")
+        with self.assertRaises(ValueError):
+            current_plan(self.backend)
+        self.runner.surface = SURFACE
+        self.runner.properties["desktops"] = ("a(iss)", [[0, "original", "private"]])
+        with self.assertRaises(ValueError):
+            current_plan(self.backend)
 
     def test_drifted_surface(self):
         self.runner.version = "kwin 6.7.6"
