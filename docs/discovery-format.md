@@ -51,6 +51,14 @@ Missing tools and failed or malformed output are unknown, never an empty
 installed set. AppImages, manual desktop files, Wine/game libraries, and
 JetBrains Toolbox internals remain outside this inventory.
 
+`settings_surfaces` checks only a fixed catalog in `adapters/surfaces.py`.
+Each row contains a logical ID, category, and `present`/`absent`/`unknown`
+state. Individual permission or filesystem failures become `unknown`; the
+overall probe observation is then `unknown` while known rows remain usable.
+No file contents, home paths, filenames, symlink targets, hashes, usernames,
+hostnames, or timestamps are serialized. This establishes presence only, not
+the meaning or correctness of settings.
+
 Detailed KScreen state is intentionally `not_collected` until a separately
 approved normal-session experiment. EFI inventory is deferred. The collector
 does not inspect logs or journal contents.

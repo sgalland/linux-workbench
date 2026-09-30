@@ -17,6 +17,11 @@ Agents can inspect current state, help develop a plan, and investigate unfamilia
 
 For v0.2, discovery should eventually use deterministic local collection code running in the normal user session. The collector should summarize and sanitize relevant system, desktop, device, and session facts into reviewable output. Agents should analyze that sanitized output rather than depend on their own execution sandbox having direct access to every desktop, audio, USB, or user-session facility. Collection should remain read-only and must not imply authorization to apply a plan.
 
+Reviewed settings-surface paths and categories live in `adapters/surfaces.py`,
+including the small KDE Plasma set. The collector only checks metadata for
+those fixed paths and emits logical IDs and presence states. Desktop file
+details do not enter the machine-independent specification.
+
 ## System change lifecycle
 
 Any separately authorized system configuration change follows **inspect → plan → backup → apply → verify → rollback**. Store reusable plans and discoveries in the repository, but never treat a generated plan as authorization to execute it.

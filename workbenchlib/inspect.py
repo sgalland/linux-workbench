@@ -16,6 +16,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from adapters.surfaces import discover as discover_surfaces
+
 SCHEMA_VERSION = 1
 COLLECTOR_VERSION = "0.3.0"
 TIMEOUT_SECONDS = 8
@@ -444,7 +446,7 @@ def _probe_audio_sysfs(name: str, path: Path, *, filter_audio: bool = False) -> 
         return {"id": name, "status": "read_error", "observation": "unknown", "facts": {}, "provenance": {"kind": "sysfs_direct_children", "path": str(path)}}
 
 
-def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = Path("/sys"), etc: Path = Path("/etc")) -> dict[str, Any]:
+def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = Path("/sys"), etc: Path = Path("/etc"), home: Path | None = None) -> dict[str, Any]:
     """Collect one snapshot. Paths are injectable for fixture-only tests."""
     probes: list[dict[str, Any]] = []
     # Stable basic facts, useful to supersede the manually assembled baseline.
@@ -473,6 +475,8 @@ def collect(runner: Runner = _run, *, proc: Path = Path("/proc"), sysfs: Path = 
         _probe_command("software_foreign_explicit", ["pacman", "-Qqem"], _parse_package_ids, runner),
         _probe_command("software_flatpak_apps", ["flatpak", "list", "--app", "--columns=application"], _parse_flatpak_ids, runner),
     ])
+    surfaces = discover_surfaces(home if home is not None else Path.home(), etc)
+    probes.append({"id": "settings_surfaces", "status": "ok", "observation": "present" if all(s["state"] != "unknown" for s in surfaces) else "unknown", "facts": {"surfaces": surfaces}, "provenance": {"kind": "reviewed_surface_catalog", "catalog": "adapters.surfaces:v1"}})
 
     # Session facts contain only coarse, normalized values; raw environment is
     # never copied. Probe facility readiness with fixed display clients.
