@@ -22,8 +22,7 @@ Never expose, commit, print, or request secrets or API keys. Back up mutable con
 
 ## Current scope
 
-The current Workbench commands are read-only inspection, comparison, and
-planning. The HP Envy laptop's problematic Bang & Olufsen internal-speaker
+The HP Envy laptop's problematic Bang & Olufsen internal-speaker
 configuration remains deferred; do not diagnose or change it under this batch.
 
 `./workbench plan` classifies portable intent against a sanitized snapshot
@@ -35,8 +34,14 @@ Batch 004 adds fixture-only transaction machinery. A dry-run returns a plan
 fingerprint and narrow backup scope without mutation. Fixture authorization
 binds one transaction ID, the exact plan fingerprint, and a digest of the
 observed pre-state. Drift invalidates it. The fixture runner rejects any
-backend that is not explicitly marked fixture-only. No production
-authorization issuer, live apply command, or live backend is present. An
-agent's receipt of a batch instruction or generated plan is never live
-authorization. A later live executor would require a separate human-issued
-approval bound to the exact reviewed transaction and a fresh pre-state check.
+backend that is not explicitly marked fixture-only. Batch 004B adds a narrow
+KWin 6.7.5 pilot backend and separate `workspace-pilot` operator commands.
+Its preflight and verify commands are read-only. Authorization requires a
+human TTY entry of the transaction ID and current fingerprint, and stores a
+single-use, expiring artifact bound to runtime/config pre-state digests under
+ignored `.workbench/authorizations/`. Apply consumes it under a local lock,
+backs up the exact allowlist, rechecks state, applies typed actions with
+read-back verification, and attempts verified rollback on failure. A batch
+instruction, preflight, plan, or generated command is never authorization.
+The Batch 004B handoff explicitly forbids issuing an authorization or
+invoking live apply/rollback during the batch.

@@ -13,6 +13,9 @@ from workbenchlib.inspect import REPO_ROOT
 
 def main(args: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if args is None else args)
+    if args and args[0] == "workspace-pilot":
+        from workbenchlib.workspace_cli import main as workspace_main
+        return workspace_main(args[1:])
     if args == ["inspect"]:
         return inspect_main(args)
     if len(args) == 3 and args[0] == "compare":
@@ -34,5 +37,5 @@ def main(args: list[str] | None = None) -> int:
             return 2
         print(json.dumps(result, indent=2, sort_keys=True))
         return 0
-    print("Usage: ./workbench inspect | compare <older.json> <newer.json> | plan <desired-state> <snapshot>", file=sys.stderr)
+    print("Usage: ./workbench inspect | compare <older.json> <newer.json> | plan <desired-state> <snapshot> | workspace-pilot <command>", file=sys.stderr)
     return 2
