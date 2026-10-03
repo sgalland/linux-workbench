@@ -1,0 +1,7 @@
+schema: chatgpt-orchestrator/v1alpha1
+
+profiles:
+  routine-implementation:
+    executor: codex
+    model_policy: routine
+    effort: medium

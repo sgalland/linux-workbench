@@ -1,0 +1,15 @@
+schema: chatgpt-orchestrator/v1alpha1
+
+project:
+  id: linux-workbench
+  name: Linux Workbench
+
+repository:
+  default_branch: main
+
+execution:
+  default_profile: routine-implementation
+  max_concurrency: 1
+
+state:
+  store: local

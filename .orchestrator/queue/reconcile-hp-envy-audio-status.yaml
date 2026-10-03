@@ -1,0 +1,30 @@
+schema: chatgpt-orchestrator/v1alpha1
+
+id: reconcile-hp-envy-audio-status
+title: Reconcile HP Envy audio status boundary
+
+requirements:
+  document: docs/orchestrator/reconcile-hp-envy-audio-status.md
+
+execution:
+  profile: routine-implementation
+
+approval:
+  required: true
+
+eligibility:
+  mode: manual
+
+dependencies: []
+
+constraints:
+  require_clean_worktree: true
+  require_branch: main
+
+validation:
+  commands:
+    - git diff --check
+    - python -m pytest -q
+
+completion:
+  gate: implementation-review

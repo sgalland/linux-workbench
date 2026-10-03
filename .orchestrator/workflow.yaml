@@ -1,0 +1,16 @@
+schema: chatgpt-orchestrator/v1alpha1
+
+workflow:
+  default_approval: required
+  default_dependency_state: completed
+  default_failure_policy: stop
+  default_missed_schedule_policy: run_once
+  default_capacity_retry:
+    mode: bounded-backoff
+    initial_minutes: 15
+    max_minutes: 120
+
+gates:
+  implementation-review:
+    type: planner
+    description: Review implementation outcome before work is accepted.
