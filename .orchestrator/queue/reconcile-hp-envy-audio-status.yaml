@@ -24,7 +24,7 @@ constraints:
 validation:
   commands:
     - git diff --check
-    - python -m pytest -q
+    - python3 -m unittest discover -s tests -q
 
 completion:
   gate: implementation-review
