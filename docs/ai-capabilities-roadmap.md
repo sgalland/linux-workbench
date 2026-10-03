@@ -52,6 +52,14 @@ Exit criterion: the repository's safety and architecture rules remain the common
 
 Provide a conversational/read-only reasoning layer over Workbench evidence.
 
+The first implemented substrate is `workbenchlib.explanation_evidence.build_bundle`.
+It accepts explicit normalized snapshot, comparison, and proposal documents and
+returns a JSON-serializable bundle with separate observations, changes, and
+proposal sections. Probe status, unknown observations, and provenance are
+retained. Missing sections are `null`; incomplete probe facts become unknown.
+It performs no collection or model reasoning. This is evidence preparation,
+not completion of A1 Explain/Advise or authority to apply a proposal.
+
 Representative user intents:
 
 - “What changed since my last known-good state?”
