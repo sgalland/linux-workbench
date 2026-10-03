@@ -60,6 +60,13 @@ retained. Missing sections are `null`; incomplete probe facts become unknown.
 It performs no collection or model reasoning. This is evidence preparation,
 not completion of A1 Explain/Advise or authority to apply a proposal.
 
+The next deterministic substrate is
+`workbenchlib.explanation_formatter.format_bundle`. It renders an explicit A1
+evidence bundle as stable terminal text with separate known observations,
+unknown/incomplete evidence, comparison changes, and proposal-only sections.
+Facts and provenance remain uninterpreted data. This formatter performs no
+collection or model reasoning and does not complete A1 Explain/Advise.
+
 Representative user intents:
 
 - “What changed since my last known-good state?”
