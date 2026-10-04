@@ -78,10 +78,10 @@ rg -i '0c4c|04f3' /usr/lib/udev/rules.d/70-libfprint-2.rules /usr/lib/udev/hwdb.
 gdbus call --system --dest net.reactivated.Fprint --object-path /net/reactivated/Fprint/Manager --method net.reactivated.Fprint.Manager.GetDevices
 ```
 
-## Recommended next step and uncertainties
+## Initial recommended next step and uncertainties (2026-10-03)
 
-First, in the ordinary CachyOS desktop session, repeat the read-only
-`GetDevices` query above to confirm whether `fprintd` actually exposes the
+The initial recommendation was to repeat the read-only `GetDevices` query in
+the ordinary CachyOS desktop session to confirm whether `fprintd` exposes the
 reader. Do not infer support from a nearby USB ID. If it returns no device,
 review the exact-ID `elanmoc2` source and merge-request status, then prepare a
 separate, reversible CachyOS package/integration proposal for human review.
@@ -90,3 +90,21 @@ package upgrades, daemon compatibility, device-side template behavior, and a
 rollback to the stock package before any install or enrollment is authorized.
 No firmware need has been established. If further device diagnostics require
 privilege, propose the specific command for separate approval.
+
+## Desktop `fprintd` follow-up (2026-10-04)
+
+Sysfs again identified the present reader as ELAN `04f3:0c4c` (`ELAN:ARM-M4`)
+before the daemon result was interpreted. The exact read-only query was:
+
+```text
+gdbus call --system --dest net.reactivated.Fprint --object-path /net/reactivated/Fprint/Manager --method net.reactivated.Fprint.Manager.GetDevices
+```
+
+The sandboxed call was blocked with `Error connecting: Could not connect:
+Operation not permitted`. Running the same query from the normal host
+environment returned `(@ao [],)`: the installed `fprintd` service was reachable
+but exposed no devices. Thus local stock runtime recognition of this reader is
+**absent**. No fingerprint operation or host configuration change was performed.
+
+Next, evaluate the exact-ID experimental `elanmoc2`/patched-`libfprint` path in
+a separate human-reviewed proposal before any installation or enrollment.

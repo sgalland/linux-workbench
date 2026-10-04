@@ -13,8 +13,9 @@ audio configuration.
 
 The [fingerprint-reader investigation](fingerprint-investigation.md) identifies
 the ELAN `04f3:0c4c` USB reader. Stock support appears absent; an experimental
-`libfprint` driver exists. Recognition by the installed `fprintd` remains
-unconfirmed because the read-only D-Bus query was blocked in this environment.
+`libfprint` driver exists. A 2026-10-04 read-only desktop `fprintd` query
+reached the service but returned no devices, confirming that this installation
+does not currently expose the reader.
 
 The [SD card-reader investigation](sd-card-reader-investigation.md) identifies
 the Realtek `10ec:5228` PCIe reader and a confirmed kernel/module-tree mismatch.
