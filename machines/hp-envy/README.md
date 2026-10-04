@@ -10,3 +10,8 @@ future audio work; the proposed pin override was never applied successfully.
 
 Workbench inventory, comparison, and planning do not diagnose or change this
 audio configuration.
+
+The [fingerprint-reader investigation](fingerprint-investigation.md) identifies
+the ELAN `04f3:0c4c` USB reader. Stock support appears absent; an experimental
+`libfprint` driver exists. Recognition by the installed `fprintd` remains
+unconfirmed because the read-only D-Bus query was blocked in this environment.
