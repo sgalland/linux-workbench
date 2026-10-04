@@ -15,3 +15,8 @@ The [fingerprint-reader investigation](fingerprint-investigation.md) identifies
 the ELAN `04f3:0c4c` USB reader. Stock support appears absent; an experimental
 `libfprint` driver exists. Recognition by the installed `fprintd` remains
 unconfirmed because the read-only D-Bus query was blocked in this environment.
+
+The [SD card-reader investigation](sd-card-reader-investigation.md) identifies
+the Realtek `10ec:5228` PCIe reader. It detects an inserted card, but no MMC
+block device appears while the running kernel's module tree is missing. A
+matching-kernel boot and read-only recheck are the proposed next step.
