@@ -1,0 +1,31 @@
+schema: chatgpt-orchestrator/v1alpha1
+
+id: verify-hp-envy-fingerprint-fprintd
+title: Verify HP Envy fingerprint reader with fprintd
+
+requirements:
+  document: docs/orchestrator/verify-hp-envy-fingerprint-fprintd.md
+
+execution:
+  profile: routine-implementation
+
+approval:
+  required: true
+
+eligibility:
+  mode: manual
+
+dependencies:
+  - inventory-hp-envy-fingerprint-reader
+
+constraints:
+  require_clean_worktree: true
+  require_branch: main
+
+validation:
+  commands:
+    - git diff --check
+    - python3 -m unittest discover -s tests -q
+
+completion:
+  gate: implementation-review
