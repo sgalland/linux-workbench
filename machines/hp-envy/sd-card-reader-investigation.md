@@ -89,3 +89,28 @@ If a matching boot still detects the card without `mmcblk`, inspect the
 specific udev/module-load failure and kernel messages before proposing any
 module, package, quirk, or firmware change. Card readability, partition layout,
 and filesystem health remain unknown.
+
+
+## Resolution verification
+
+Follow-up verification after a normal reboot confirmed the suspected
+running-kernel/module-tree mismatch.
+
+With the machine booted into `7.2.9-1-cachyos`:
+
+- `uname -r` reported `7.2.9-1-cachyos`;
+- `modinfo mmc_block` resolved
+  `/lib/modules/7.2.9-1-cachyos/kernel/drivers/mmc/core/mmc_block.ko.zst`
+  with alias `mmc:block`;
+- with the SD card inserted, `lsblk` exposed `mmcblk0` (119.4 GiB) and
+  partitions `mmcblk0p1` and `mmcblk0p2`.
+
+This confirms that the card reader, Realtek controller path, MMC host, and
+block-device path are functional with the matching kernel/module tree. The
+observed failure occurred while `7.2.8-1-cachyos` was still running after its
+matching module tree was no longer available, leaving the modular
+`mmc_block` driver unavailable.
+
+**Resolution:** rebooting into the installed `7.2.9-1-cachyos` kernel restored
+the SD card as an MMC block device. No Realtek-specific quirk, firmware change,
+out-of-tree driver, filesystem repair, or media modification was required.
