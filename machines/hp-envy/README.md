@@ -17,6 +17,7 @@ the ELAN `04f3:0c4c` USB reader. Stock support appears absent; an experimental
 unconfirmed because the read-only D-Bus query was blocked in this environment.
 
 The [SD card-reader investigation](sd-card-reader-investigation.md) identifies
-the Realtek `10ec:5228` PCIe reader. It detects an inserted card, but no MMC
-block device appears while the running kernel's module tree is missing. A
-matching-kernel boot and read-only recheck are the proposed next step.
+the Realtek `10ec:5228` PCIe reader and a confirmed kernel/module-tree mismatch.
+The reader detected media under the stale `7.2.8-1-cachyos` kernel but could not
+load modular `mmc_block`; after rebooting into installed `7.2.9-1-cachyos`,
+`mmcblk0` and both card partitions appeared. The reader is confirmed working.
