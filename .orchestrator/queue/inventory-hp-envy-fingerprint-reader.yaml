@@ -1,0 +1,30 @@
+schema: chatgpt-orchestrator/v1alpha1
+
+id: inventory-hp-envy-fingerprint-reader
+title: Inventory HP Envy fingerprint reader support
+
+requirements:
+  document: docs/orchestrator/inventory-hp-envy-fingerprint-reader.md
+
+execution:
+  profile: routine-implementation
+
+approval:
+  required: true
+
+eligibility:
+  mode: manual
+
+dependencies: []
+
+constraints:
+  require_clean_worktree: true
+  require_branch: main
+
+validation:
+  commands:
+    - git diff --check
+    - python3 -m unittest discover -s tests -q
+
+completion:
+  gate: implementation-review
