@@ -157,7 +157,12 @@ Mutation authority: repository changes may be proposed/implemented under normal 
 
 ## A5 — Bounded agent work queues
 
-Bring the successful batch workflow into Workbench as an explicit orchestration capability.
+Integrate the successful Workbench batch workflow with ChatGPT Orchestrator
+rather than growing a competing general-purpose queue engine inside Workbench.
+Workbench should define domain-specific goals, allowed probes, evidence
+constraints, verification, and safety stop conditions; Orchestrator should own
+generic scheduling, dependency handling, recovery, checkpointing, capacity
+waits, and agent dispatch where practical.
 
 A queue should define:
 
@@ -215,7 +220,11 @@ Mutation authority: reviewer consensus never substitutes for human authorization
 
 ## A8 — Provider and model routing
 
-Allow Workbench to select among available agents/models based on capability, privacy, cost, latency, and task type without changing workstation semantics.
+Prefer sharing ChatGPT Orchestrator's executor/profile routing for Workbench AI
+tasks rather than building a second independent provider router, while keeping
+Workbench functional without Orchestrator. Routing may select among available
+agents/models based on capability, privacy, cost, latency, and task type
+without changing workstation semantics.
 
 Possible policy dimensions:
 
@@ -256,3 +265,26 @@ Workbench should not become:
 - a self-modifying safety policy.
 
 The core product idea remains a **deterministic workstation manager with an intelligent reasoning layer**, not an autonomous model with a shell.
+
+
+## ChatGPT Orchestrator integration target
+
+Once individual Workbench AI capabilities are stable enough to expose deliberate
+contracts, they should be added to `sgalland/chatgpt-orchestrator` for
+scheduling, supervision, recovery, status, agent-role workflows, and eventual
+provider routing.
+
+The Orchestrator integration design is recorded in
+`sgalland/chatgpt-orchestrator/docs/linux-workbench-ai-integration.md`.
+
+The ownership boundary is deliberate:
+
+- Workbench remains authoritative for workstation evidence, intent, adapters,
+  transactions, fingerprints, backups, verification, rollback, and any
+  workstation-specific authorization requirement.
+- Orchestrator may schedule and supervise Workbench work, but an Orchestrator
+  task/gate approval must not silently satisfy a Workbench system-mutation
+  authorization.
+- Workbench remains independently usable without Orchestrator.
+- Orchestrator should consume structured Workbench contracts rather than scrape
+  CLI prose or duplicate Workbench's safety engine.
