@@ -22,3 +22,9 @@ the Realtek `10ec:5228` PCIe reader and a confirmed kernel/module-tree mismatch.
 The reader detected media under the stale `7.2.8-1-cachyos` kernel but could not
 load modular `mmc_block`; after rebooting into installed `7.2.9-1-cachyos`,
 `mmcblk0` and both card partitions appeared. The reader is confirmed working.
+
+The [CachyOS reinstall state](cachyos-reinstall-2026-10.md) records the
+September/October 2026 application baseline, package-management decisions,
+ModernUO/ClassicUO layout, Insync choice, validated KVM/libvirt host setup,
+deferred Windows 11 Secure Boot work, and remaining gaming compatibility
+items. It is a reproducibility record and does not authorize system mutation.
