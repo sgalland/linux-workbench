@@ -20,12 +20,33 @@ Batch 003 completed the read-only feasibility investigation and produced a candi
 
 ## v0.5 — First controlled reversible mutation
 
-Batch 004 prepared the mutation transaction model, private backup substrate,
-KWin 6.7.5 workspace adapter design, fixture lifecycle proof, and a sanitized
-four-workspace live dry-run. The pilot is [awaiting exact human authorization](reviews/workbench-batch-004-workspace-pilot.md).
-No live desktop change has been applied. A future approved transaction must
-revalidate pre-state, back up, apply, verify, and roll back on failure under
-the safety lifecycle. This roadmap entry grants no authorization.
+Batch 004 established the mutation transaction model, private backup substrate,
+fixture lifecycle proof, and four-workspace pilot design. Batch 004B added the
+narrow production KWin 6.7.5 executor, one-time authorization store, lifecycle
+runner, and operator CLI, then correctly stopped when the live D-Bus signature
+did not match the declared interface metadata. Batch 004C source-verified that
+KWin 6.7.5 declares `a(iss)` in its interface XML while its C++ runtime
+structure marshals `a(uss)`, added exact-version regression coverage, and
+completed a fresh read-only preflight.
+
+The current reviewed pilot remains `kde-four-workspaces-v1` with fingerprint
+`67b55bbe399a0eee08843d5b2ae86b83c95da3651c0a1c9f4bc0232e5b9d7963`.
+The fresh Batch 004C preflight matched the original reviewed fingerprint.
+See the [Batch 004C review gate](reviews/workbench-batch-004c-review.md) and
+[pilot sheet](reviews/workbench-batch-004c-workspace-pilot.md).
+
+No production authorization has been issued and no live desktop mutation has
+been applied. Any future execution must still receive explicit human
+authorization for the exact current transaction/fingerprint and revalidate
+pre-state before backup/apply/verify/rollback.
+
+## Batch 005 — Broader workstation reconciliation and configuration
+
+**Status: explicitly deferred.**
+
+Do not begin broader workstation reconciliation/configuration work merely
+because v0.5 machinery exists. Resume Batch 005 only when the user explicitly
+promotes it again. Read-only AI capability work may continue independently.
 
 
 ## AI capability track
