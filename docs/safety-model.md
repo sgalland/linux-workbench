@@ -45,3 +45,14 @@ read-back verification, and attempts verified rollback on failure. A batch
 instruction, preflight, plan, or generated command is never authorization.
 The Batch 004B handoff explicitly forbids issuing an authorization or
 invoking live apply/rollback during the batch.
+
+
+Batch 004C source-verified the KWin 6.7.5 VirtualDesktopManager discrepancy:
+the interface XML advertises the `desktops` property as `a(iss)` while the
+exact-version C++ runtime structure marshals `a(uss)`. The production backend
+accepts only that exact version-specific declared/runtime pair and otherwise
+fails closed. The fresh read-only preflight matched the previously reviewed
+`kde-four-workspaces-v1` fingerprint
+`67b55bbe399a0eee08843d5b2ae86b83c95da3651c0a1c9f4bc0232e5b9d7963`.
+No production authorization has been issued and no live workspace mutation has
+been performed.
